@@ -1,0 +1,2603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python CLI: Conceptos Avanzados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════
+   VARIABLES Y RESET GLOBAL
+═══════════════════════════════════════════ */
+:root {
+  --bg:         #020705;
+  --bg2:        #08120a;
+  --text:       #c9ffd0;
+  --text-dim:   #7ba083;
+  --green:      #9cff99;
+  --red:        #ff7e7e;
+  --yellow:     #f8da7c;
+  --blue:       #8ad4ff;
+  --magenta:    #d8b8ff;
+  --cyan:       #8be5ff;
+  --border:     rgba(156,255,159,0.18);
+  --radius:     8px;
+  --font:       'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 28%), #020705;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 100% 3px;
+  opacity: 0.18;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Scrollbars internas (Código, Terminales, Diagramas) */
+.snippet-body::-webkit-scrollbar,
+.terminal-body::-webkit-scrollbar,
+.flowchart::-webkit-scrollbar,
+.fstring-anatomy::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.snippet-body::-webkit-scrollbar-track,
+.terminal-body::-webkit-scrollbar-track,
+.flowchart::-webkit-scrollbar-track,
+.fstring-anatomy::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+.snippet-body::-webkit-scrollbar-thumb,
+.terminal-body::-webkit-scrollbar-thumb,
+.flowchart::-webkit-scrollbar-thumb,
+.fstring-anatomy::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 102, 0.3);
+  border-radius: 4px;
+}
+.snippet-body::-webkit-scrollbar-thumb:hover,
+.terminal-body::-webkit-scrollbar-thumb:hover,
+.flowchart::-webkit-scrollbar-thumb:hover,
+.fstring-anatomy::-webkit-scrollbar-thumb:hover {
+  background: var(--green);
+}
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  height: 52px;
+  transition: transform 0.3s ease;
+}
+
+nav.nav-hidden {
+  transform: translateY(-100%);
+}
+
+.nav-logo {
+  color: var(--green);
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  display: inline-block;
+  transform-origin: center;
+  animation: pulse-logo 3s ease-in-out infinite;
+}
+
+.nav-logo:hover {
+  animation: wobble-logo 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-logo {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes wobble-logo {
+  0% { transform: scale(1.1) rotate(-4deg); }
+  100% { transform: scale(1.1) rotate(4deg); }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--green);
+  transition: width 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 8px var(--green);
+  border-radius: 2px;
+}
+
+.nav-links a:hover {
+  color: var(--green);
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+
+.nav-links a:hover::after {
+  width: 80%;
+}
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--magenta);
+  border: 1px solid var(--magenta);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  animation: pulse-badge 2s infinite ease-in-out;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 0 2px rgba(204, 102, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(204, 102, 255, 0.6);
+    text-shadow: 0 0 4px rgba(204, 102, 255, 0.4);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  position: relative;
+  padding: 120px 1.5rem 60px;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle 200px at top center, rgba(156,255,159,0.08), transparent 32%);
+  background-size: 100% 24px, cover;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.hero-console {
+  max-width: 850px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.hero-console .tl {
+  margin-bottom: 1.5rem;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+/* Título ASCII */
+.hero-ascii {
+  color: var(--blue);
+  font-family: var(--font);
+  white-space: pre; /* CRÍTICO: Esto mantiene la forma del texto ASCII */
+  font-size: clamp(6px, 1.8vw, 14px);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+/* Typing animation */
+.typing-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.typing-prompt { color: var(--green); font-weight: 700; margin-right: 8px; }
+
+.typing-text {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--green);
+  width: 0;
+  /* Ajustamos los pasos (steps) a 35, igual a la cantidad de letras */
+  animation: type 2.5s steps(35, end) 0.5s forwards,
+             blink 0.8s step-end infinite;
+}
+
+@keyframes type {
+  from { width: 0; }
+  /* Ampliamos el ancho a 35 caracteres (35ch) */
+  to   { width: 35ch; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+
+/* ═══════════════════════════════════════════
+   CONTENEDOR PRINCIPAL
+═══════════════════════════════════════════ */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ═══════════════════════════════════════════
+   SEPARADORES
+═══════════════════════════════════════════ */
+.sep {
+  color: var(--border);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 3rem 0 2rem;
+  letter-spacing: 0.1em;
+}
+
+/* ═══════════════════════════════════════════
+   MÓDULOS
+═══════════════════════════════════════════ */
+.module {
+  padding: 4rem 3rem;
+  background: rgba(5, 8, 6, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 80px rgba(0, 255, 102, 0.03);
+  border-radius: 20px;
+  margin-bottom: 4rem;
+}
+
+/* [A] Encabezado del módulo */
+.module-header { margin-bottom: 2.5rem; }
+
+.module-num {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.module-title {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 1rem;
+}
+
+.module-title .accent { color: var(--blue); }
+
+.module-def {
+  border-left: 3px solid var(--green);
+  padding: 1rem 1.5rem;
+  background: rgba(10, 20, 14, 0.85);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.module-def strong { color: var(--text); }
+
+/* [B] Antes vs Después */
+.section-label {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: rgba(5, 8, 6, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 30px rgba(0, 255, 102, 0.03);
+}
+
+.compare-col {
+  padding: 1.5rem;
+  position: relative;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.compare-col.bad {
+  background: linear-gradient(180deg, rgba(255, 77, 77, 0.08) 0%, transparent 80%);
+  border-right: 1px dashed rgba(255,255,255,0.05);
+}
+
+.compare-col.bad:hover {
+  background: linear-gradient(180deg, rgba(255, 77, 77, 0.15) 0%, transparent 90%);
+  box-shadow: inset 0 0 20px rgba(255, 77, 77, 0.05);
+}
+
+.compare-col.good {
+  background: linear-gradient(180deg, rgba(0, 255, 102, 0.08) 0%, transparent 80%);
+}
+
+.compare-col.good:hover {
+  background: linear-gradient(180deg, rgba(0, 255, 102, 0.15) 0%, transparent 90%);
+  box-shadow: inset 0 0 20px rgba(0, 255, 102, 0.05);
+}
+
+.compare-header {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.05em;
+}
+
+.compare-col.bad .compare-header {
+  border-bottom-color: rgba(255, 77, 77, 0.2);
+  text-shadow: 0 0 8px rgba(255, 77, 77, 0.3);
+}
+
+.compare-col.good .compare-header {
+  border-bottom-color: rgba(0, 255, 102, 0.2);
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
+}
+
+@media (max-width: 768px) {
+  .module { padding: 3rem 1.5rem; margin-bottom: 3rem; }
+  .compare-grid { grid-template-columns: 1fr; }
+  .compare-col.bad { border-right: none; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+  nav { padding: 0 1rem; }
+  .nav-logo .ascii-extra { display: none; }
+}
+
+/* Los colores se controlarán desde el HTML con spans */
+
+/* Syntax highlighting */
+pre {
+  font-family: var(--font);
+  font-size: 12.5px;
+  line-height: 1.65;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.kw   { color: var(--magenta); }
+.fn   { color: var(--blue); }
+.str  { color: var(--yellow); }
+.cmt  { color: #6e7681; font-style: italic; }
+.num  { color: #79c0ff; }
+.op   { color: #ff7b72; }
+.cls  { color: #ffa657; }
+.bi   { color: var(--cyan); }
+.var  { color: var(--text); }
+.grn  { color: var(--green); }
+.red  { color: var(--red); }
+.ylw  { color: var(--yellow); }
+.mg   { color: var(--magenta); }
+
+/* [C] Diagrama de flujo */
+.flowchart {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  overflow-x: auto;
+}
+
+.flow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.flow-box {
+  border: 1px solid var(--blue);
+  color: var(--text);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  background: rgba(88,166,255,0.08);
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(88,166,255,0.3);
+}
+
+.flow-box.start   { border-color: var(--green); background: rgba(57,211,83,0.08); color: var(--green); box-shadow: 0 0 10px rgba(57,211,83,0.3); }
+.flow-box.end     { border-color: var(--green); background: rgba(57,211,83,0.12); color: var(--green); font-weight: 700; box-shadow: 0 0 15px rgba(57,211,83,0.5); }
+.flow-box.decision{ border-color: var(--yellow); background: rgba(227,179,65,0.08); color: var(--yellow); border-style: dashed; box-shadow: 0 0 10px rgba(227,179,65,0.3); }
+.flow-box.action  { border-color: var(--magenta); background: rgba(210,168,255,0.08); color: var(--magenta); box-shadow: 0 0 10px rgba(210,168,255,0.3); }
+.flow-box.error   { border-color: var(--red); background: rgba(248,81,73,0.08); color: var(--red); box-shadow: 0 0 10px rgba(248,81,73,0.3); }
+.flow-box.fin     { border-color: var(--cyan); background: rgba(121,192,255,0.08); color: var(--cyan); box-shadow: 0 0 10px rgba(121,192,255,0.3); }
+
+.flow-arrow { color: var(--text-dim); font-size: 16px; }
+.flow-label { font-size: 10px; color: var(--text-dim); }
+
+.flow-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flow-branch {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* [D] Simulación de terminal */
+.terminal-window {
+  border: 1px solid rgba(156,255,159,0.16);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  background: rgba(0, 10, 5, 0.94);
+  box-shadow: inset 0 0 60px rgba(0,255,140,0.06);
+  position: relative;
+}
+
+.terminal-bar {
+  background: rgba(3, 5, 4, 0.9);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-tabs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 30px;
+}
+
+.terminal-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.terminal-tab.active {
+  background: rgba(156,255,159,0.16);
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(156,255,159,0.12);
+}
+
+.terminal-actions {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0,0,0,0.6);
+  font-size: 10px;
+  font-weight: 900;
+  cursor: help;
+}
+.dot.r { background: #ff5f57; }
+.dot.y { background: #febc2e; }
+.dot.g { background: #28c840; }
+
+.terminal-actions:hover .dot.r::after { content: "×"; margin-bottom: 1px; }
+.terminal-actions:hover .dot.y::after { content: "−"; margin-bottom: 1px; }
+.terminal-actions:hover .dot.g::after { content: "+"; }
+
+.terminal-title {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.snippet-toolbar,
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal-body {
+  padding: 1.2rem 1.5rem;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.snippet-panel {
+  display: none;
+}
+
+.snippet-panel.active {
+  display: block;
+}
+
+.terminal-placeholder,
+.snippet-note {
+  padding: 1rem 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.snippet-body {
+  overflow-x: auto;
+  padding: 1rem 0 1.2rem;
+}
+
+/* Líneas animadas */
+.tl {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: background 0.2s ease;
+  border-radius: 4px;
+}
+
+.tl:hover {
+  background: rgba(0, 255, 102, 0.08);
+}
+
+.snippet-wrap.active .snippet-panel.active .tl,
+.terminal-window.active .tl {
+  animation: fadein 0.3s ease forwards;
+}
+
+@keyframes fadein {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.t-prompt { color: var(--green); font-weight: 700; }
+.t-cmd    { color: var(--text); }
+.t-out    { color: var(--text-dim); }
+.t-ok     { color: var(--green); font-weight: 700; }
+.t-err    { color: var(--red); }
+.t-warn   { color: var(--yellow); }
+.t-sep    { color: #30363d; }
+.t-fin    { color: var(--magenta); }
+
+/* Conservación de espacios estricta para la boleta ASCII */
+.t-ticket { color: var(--cyan); font-family: var(--font); white-space: pre; display: inline-block;}
+
+/* [E] Snippet de código */
+.snippet-wrap {
+  background: rgba(0, 10, 5, 0.95);
+  border: 1px solid rgba(156,255,159,0.16);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: inset 0 0 35px rgba(0,255,140,0.05);
+  position: relative;
+}
+
+.snippet-tabs {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.snippet-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.snippet-tab.active {
+  background: rgba(156,255,159,0.16);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px rgba(156,255,159,0.1);
+}
+
+.snippet-header {
+  display: flex;
+  align-items: center;
+}
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 11px;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover { border-color: var(--blue); color: var(--blue); }
+.copy-btn:active { transform: scale(0.96) translateY(1px); }
+.copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+.run-btn { border-color: var(--green); color: var(--green); font-weight: 700; }
+.run-btn:hover { background: rgba(57,211,83,0.1); color: var(--green); box-shadow: 0 0 10px rgba(57,211,83,0.2); }
+.run-btn:active { box-shadow: 0 0 4px rgba(57,211,83,0.2); }
+
+.snippet-body {
+  overflow-x: auto;
+}
+
+/* ESTRUCTURA NATIVA CON CSS COUNTERS PARA TODOS LOS MÓDULOS */
+.code-lines {
+  display: table;
+  width: 100%;
+  padding: 1rem 0;
+  counter-reset: lineno;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.line {
+  display: table-row;
+  counter-increment: lineno;
+  transition: background 0.2s ease;
+}
+
+.line:hover {
+  background: rgba(0, 255, 102, 0.08);
+}
+
+.line:hover .line-num {
+  color: var(--green);
+  opacity: 0.9;
+}
+
+.line-num {
+  display: table-cell;
+  width: 44px;
+  padding: 0 12px 0 16px;
+  text-align: right;
+  color: var(--text-dim);
+  opacity: 0.4;
+  user-select: none;
+  border-right: 1px solid var(--border);
+  font-size: 12px;
+  white-space: nowrap;
+  transition: color 0.2s ease, opacity 0.2s ease, text-shadow 0.2s ease;
+}
+
+.line-num:hover {
+  color: var(--text);
+  opacity: 1;
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.8);
+}
+
+.line-num::before {
+  content: counter(lineno);
+}
+
+.line-code {
+  display: table-cell;
+  padding: 0 1.5rem;
+  white-space: pre;
+  font-family: var(--font);
+}
+
+/* ═══════════════════════════════════════════
+   INFOGRAFÍA F-STRING (módulo 3)
+═══════════════════════════════════════════ */
+.fstring-anatomy {
+  background: rgba(5, 8, 6, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  margin-bottom: 2.5rem;
+  overflow-x: auto;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 30px rgba(0, 255, 102, 0.03);
+}
+
+.fstring-display {
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding: 1.2rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius);
+  letter-spacing: 0.05em;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+
+.fstring-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.fstr-part {
+  text-align: center;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius);
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-style: solid !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.fstr-part .label { font-weight: 700; font-size: 11px; display: block; margin-bottom: 2px; }
+.fstr-part .example { font-size: 11px; opacity: 0.7; }
+
+.fstr-part:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4), 0 0 15px currentColor !important;
+  background: var(--bg2) !important;
+}
+
+.fstr-var   { border: 1px solid var(--cyan);    background: rgba(0, 255, 255, 0.1) !important; color: var(--cyan); }
+.fstr-fill  { border: 1px solid var(--magenta); background: rgba(204, 102, 255, 0.1) !important; color: var(--magenta); }
+.fstr-align { border: 1px solid var(--yellow);  background: rgba(255, 208, 0, 0.1) !important; color: var(--yellow); }
+.fstr-width { border: 1px solid var(--blue);    background: rgba(0, 191, 255, 0.1) !important; color: var(--blue); }
+.fstr-prec  { border: 1px solid var(--green);   background: rgba(0, 255, 102, 0.1) !important; color: var(--green); }
+.fstr-type  { border: 1px solid var(--red);     background: rgba(255, 77, 77, 0.1) !important; color: var(--red); }
+
+.fstr-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 2rem;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.fstr-table:hover {
+  border-color: var(--green);
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+}
+
+.fstr-table th {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 12px 16px;
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fstr-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  vertical-align: middle;
+}
+
+.fstr-table tr:last-child td { border-bottom: none; }
+.fstr-table tr:nth-child(even) td { background: rgba(0, 0, 0, 0.2); }
+.fstr-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+/* ═══════════════════════════════════════════
+   BOTÓN VOLVER ARRIBA
+═══════════════════════════════════════════ */
+#back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 45px;
+  height: 45px;
+  background: rgba(5, 8, 6, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  color: var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(0, 255, 102, 0.05);
+}
+
+#back-to-top svg {
+  width: 24px;
+  height: 24px;
+}
+
+#back-to-top.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+#back-to-top:hover {
+  background: var(--bg2);
+  border-color: var(--green);
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+  transform: translateY(-3px);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+footer .ascii { color: var(--green); margin-bottom: 0.5rem; }
+
+/* ═══════════════════════════════════════════
+   MODO HACKER / RETRO TERMINAL
+═══════════════════════════════════════════ */
+
+/* 1. SELECCIÓN DE TEXTO ESTILO TERMINAL */
+::selection {
+  background: var(--green);
+  color: var(--bg);
+}
+::-moz-selection {
+  background: var(--green);
+  color: var(--bg);
+}
+
+/* 2. RESPLANDOR NEÓN (PHOSPHOR GLOW) */
+.nav-logo, .t-prompt, .t-ok, .ascii {
+  text-shadow: 0 0 8px rgba(57, 211, 83, 0.6);
+}
+.accent, .t-ticket {
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.6);
+}
+
+/* 3. EFECTO CRT (Líneas de monitor antiguo) */
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  /* Dibuja líneas horizontales semitransparentes */
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+  background-size: 100% 4px;
+  z-index: 9999;
+  pointer-events: none; /* Muy importante para no bloquear los clics */
+}
+
+/* Oscurecimiento sutil en los bordes de la pantalla (Vignette) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* 4. EFECTO GLITCH EN EL TÍTULO AL PASAR EL MOUSE */
+@keyframes glitch-anim {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px); color: var(--green); }
+  40% { transform: translate(-2px, -2px); text-shadow: 2px 0 var(--red), -2px 0 var(--blue); }
+  60% { transform: translate(2px, 2px); color: var(--text); }
+  80% { transform: translate(2px, -2px); text-shadow: -2px 0 var(--red), 2px 0 var(--blue); }
+  100% { transform: translate(0) }
+}
+
+.hero-ascii:hover {
+  animation: glitch-anim 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+  cursor: crosshair;
+}
+
+/* El prompt de la escritura del hero parpadea un poco más errático */
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 22%, 24%, 55% { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════
+   ANIMACIONES DE DESPLAZAMIENTO PERSISTENTES
+═══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  /* Animación tipo consola en lugar de deslizamiento moderno */
+  transform: translateX(-15px);
+  transition: none;
+}
+
+.reveal.active {
+  opacity: 1;
+  animation: print-line 0.25s ease-out forwards;
+}
+
+/* Efecto de encendido (Flicker/Glitch corto) solo cuando se vuelve activo */
+.reveal.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  box-shadow: inset 0 0 15px rgba(57, 211, 83, 0.2);
+  border: 1px solid var(--green);
+  opacity: 0;
+  animation: tech-power-on 0.5s ease-out forwards;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 10;
+}
+
+@keyframes tech-power-on {
+  0%   { opacity: 1; border-color: rgba(57, 211, 83, 1); }
+  30%  { opacity: 0; border-color: transparent; }
+  50%  { opacity: 0.8; border-color: rgba(57, 211, 83, 0.8); }
+  100% { opacity: 0; border-color: transparent; }
+}
+/* ═══════════════════════════════════════════
+   EFECTO DE ESCRITURA: LÍNEA POR LÍNEA
+═══════════════════════════════════════════ */
+.code-lines .line {
+  opacity: 0;
+  transform: translateX(-10px);
+  /* Resetea la animación si el bloque ya no está activo */
+  visibility: hidden; 
+}
+
+/* Cuando el contenedor padre (.snippet-wrap) se activa por el scroll, 
+   lanzamos la animación de las líneas */
+.snippet-wrap.active .code-lines .line {
+  visibility: visible;
+  /* La duración de 0.2s hace que se vea rápido y dinámico */
+  animation: print-line 0.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes print-line {
+  0%   { opacity: 0; transform: translateX(-15px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════
+   PANTALLA DE ARRANQUE (BOOT SCREEN)
+═══════════════════════════════════════════ */
+#boot-screen {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100vh;
+  background-color: #050505; /* Un negro casi puro */
+  z-index: 100000; /* Asegura que esté por encima del navbar y todo lo demás */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Para que el texto crezca desde abajo */
+  padding: 2rem 3rem 4rem;
+  font-family: var(--font);
+  transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+}
+
+/* Esta clase bloquea el scroll de la página entera mientras estás en la pantalla negra */
+body.booting {
+  overflow: hidden;
+}
+
+/* Efecto de desvanecimiento cuando termina el login */
+#boot-screen.hidden {
+  opacity: 0;
+  transform: scale(1.05); /* Efecto sutil de adentrarse en la pantalla */
+  pointer-events: none;
+}
+
+#start-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  background-color: #050505;
+  transition: opacity 0.3s ease;
+}
+
+#start-btn {
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green);
+  padding: 15px 30px;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
+  transition: all 0.2s;
+  letter-spacing: 0.1em;
+  animation: pulse-neon 2s infinite ease-in-out;
+}
+
+#start-btn:hover {
+  background: rgba(0, 255, 102, 0.1);
+  box-shadow: 0 0 25px rgba(0, 255, 102, 0.3);
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.8);
+  animation: none;
+  transform: scale(1.05);
+}
+
+@keyframes pulse-neon {
+  0% {
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(0, 255, 102, 0.4);
+    transform: scale(1.03);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
+    transform: scale(1);
+  }
+}
+
+.boot-terminal {
+  position: relative;
+  z-index: 1;
+  color: var(--green);
+  font-size: 15px;
+  line-height: 1.6;
+  text-shadow: 0 0 5px rgba(57, 211, 83, 0.8);
+  white-space: pre-wrap;
+}
+
+.boot-cursor {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+  color: var(--green);
+  margin-left: 5px;
+}
+/* Colores tácticos para la terminal de arranque */
+.boot-red { color: #f85149; text-shadow: 0 0 5px #f85149; }
+.boot-yellow { color: #e3b341; text-shadow: 0 0 5px #e3b341; }
+.boot-cyan { color: #79c0ff; text-shadow: 0 0 5px #79c0ff; }
+
+/* El bloque final de acceso concedido invertido y parpadeante */
+.boot-granted {
+  color: #050505;
+  background-color: var(--green);
+  padding: 2px 10px;
+  font-weight: 700;
+  display: inline-block;
+  animation: flash-granted 0.15s infinite alternate;
+}
+
+@keyframes flash-granted {
+  0% { opacity: 1; box-shadow: 0 0 15px var(--green); }
+  100% { opacity: 0.6; box-shadow: none; }
+}
+
+/* ═══════════════════════════════════════════
+   CURSORES PERSONALIZADOS (ESTÉTICA CYBERPUNK)
+═══════════════════════════════════════════ */
+/* 1. Cursor por defecto: Puntero angular futurista (fondo oscuro, borde neón) */
+body, html {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%230d1117' stroke='%2339d353' stroke-width='1.5' stroke-linejoin='bevel'%3E%3Cpolygon points='4,4 20,11 13,13 11,20'/%3E%3C/svg%3E") 4 4, auto !important;
+}
+
+/* 2. Cursor interactivo (links/botones): Mirilla de escaneo (Retícula) */
+a, button, .copy-btn, .nav-links a {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24' fill='none' stroke='%2339d353' stroke-width='1.5'%3E%3Cpath d='M12 2v4M12 18v4M2 12h4M18 12h4' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%2339d353'/%3E%3C/svg%3E") 13 13, pointer !important;
+}
+
+/* 3. Evitamos que el título glitch cambie de cursor */
+.hero-ascii:hover {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%230d1117' stroke='%2339d353' stroke-width='1.5' stroke-linejoin='bevel'%3E%3Cpolygon points='4,4 20,11 13,13 11,20'/%3E%3C/svg%3E") 4 4, auto !important;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PANTALLA DE ARRANQUE (BOOT SEQUENCE)
+═══════════════════════════════════════════ -->
+<div id="boot-screen">
+  <div id="start-overlay">
+    <button id="start-btn">[ INICIAR SISTEMA ]</button>
+  </div>
+  <div class="boot-terminal"><span id="boot-text"></span><span class="boot-cursor">█</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════ -->
+<nav>
+  <div class="nav-logo">
+    <span class="ascii-extra">[</span>🐍<span class="ascii-extra">]</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#mod1">Modulo 01</a></li>
+    <li><a href="#mod2">Modulo 02</a></li>
+    <li><a href="#mod3">Modulo 03</a></li>
+  </ul>
+  <div class="nav-badge">Python | CLI Edition</div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-console">
+      <div class="tl"><span class="t-prompt">&gt;</span> <span class="t-cmd">INICIANDO SISTEMA...</span></div>
+      <div class="tl"><span class="t-out">Cargando dependencias de aprendizaje...</span></div>
+      <div class="tl"><span class="t-ok">[ OK ] Sistema listo.</span></div>
+      <div class="tl"><span class="t-out"> </span></div>
+      <div class="tl">
+        <div class="hero-ascii"> ____        _   _                   ____ _     ___ 
+|  _ \ _   _| |_| |__   ___  _ __   / ___| |   |_ _|
+| |_) | | | | __| '_ \ / _ \| '_ \ | |   | |    | | 
+|  __/| |_| | |_| | | | (_) | | | || |___| |___ | | 
+|_|    \__, |\__|_| |_|\___/|_| |_| \____|_____|___|
+       |___/                                        </div>
+      </div>
+      <div class="tl"><span class="t-out">  === CONCEPTOS AVANZADOS ===</span></div>
+      <div class="tl"><span class="t-out"> </span></div>
+      <div class="tl"><span class="t-out">  [DESCRIPCIÓN]</span></div>
+      <div class="tl"><span class="t-out">  Profundiza en algoritmia, gestión de excepciones y formateo</span></div>
+      <div class="tl"><span class="t-out">  profesional de datos aplicados a programas de terminal.</span></div>
+      <div class="tl"><span class="t-out">  Aprende a escribir código robusto, eficiente y bien presentado.</span></div>
+      <div class="tl"><span class="t-out"> </span></div>
+      <div class="tl"><span class="t-out">  [ESTADO DEL SISTEMA]</span></div>
+      <div class="tl"><span class="t-out">  > Módulos cargados  : <span class="t-warn">3</span></span></div>
+      <div class="tl"><span class="t-out">  > Secciones activas : <span class="t-warn">9</span></span></div>
+      <div class="tl"><span class="t-out">  > Enfoque principal : <span class="t-warn">Terminal First</span></span></div>
+      <div class="tl"><span class="t-out"> </span></div>
+      <div class="tl">
+        <div class="typing-line">
+          <span class="typing-prompt">&gt;</span>
+          <span class="typing-text">Cargando entorno interactivo...</span>
+        </div>
+      </div>
+  </div>
+</section>
+
+<main>
+
+<!-- ════════════════════════════════════════════════════════════
+     MÓDULO 1: ALGORITMIA Y ORDENAMIENTO
+════════════════════════════════════════════════════════════ -->
+<section class="module" id="mod1">
+
+  <!-- [A] Encabezado -->
+  <div class="module-header">
+    <div class="module-num"><span class="t-prompt">&gt;</span> MÓDULO 01</div>
+    <h2 class="module-title"><span class="accent">Algoritmia</span> y Ordenamiento</h2>
+    <div class="module-def">
+      Un <strong>algoritmo de ordenamiento</strong> organiza datos, pero en Python, la elección entre <strong>.sort()</strong> y <strong>sorted()</strong> define cómo interactúa tu programa con la memoria (RAM) y la estructura de los datos.
+      <br><br>
+      <strong>¿Porqué?</strong> <code><strong>.sort()</strong></code> es un método <em>exclusivo de las listas</em>. Trabaja <strong>in-place</strong>, es decir, reescribe los bloques de memoria originales destruyendo el orden anterior y retorna <code>None</code>. Al no clonar información, es la vía más rápida y eficiente para procesar bases de datos masivas. En contraste, <code><strong>sorted()</strong></code> es una función universal que acepta <em>cualquier iterable</em> (incluso tuplas o diccionarios, que no tienen <code>.sort</code> propio). Para funcionar, el procesador asigna nueva memoria, crea una lista nueva desde cero, la ordena y te la entrega. Protege tu información original de mutaciones (ideal para programación funcional), pero exige más RAM temporal. Bajo el capó, ambos usan <em>Timsort</em>, un motor híbrido ultrarrápido.
+    </div>
+  </div>
+
+  <!-- [B] Antes vs Después -->
+  <div class="section-label"><span class="t-prompt">&gt;</span> COMPARATIVA: ANTES VS DESPUÉS</div>
+  <div class="compare-grid">
+    <div class="compare-col bad">
+      <div class="compare-header"><span class="compare-icon">✗</span> CÓDIGO INEFICIENTE</div>
+<pre><span class="cmt"># Ordenamiento manual — confuso y verboso</span>
+<span class="cmt"># No se sabe qué criterio usa, ni si</span>
+<span class="cmt"># modifica la lista o crea una nueva.</span>
+<span class="var">datos</span> <span class="op">=</span> [<span class="num">5</span>, <span class="num">2</span>, <span class="num">8</span>, <span class="num">1</span>, <span class="num">9</span>]
+
+<span class="cmt"># ❌ Bubble sort a mano sin estructura</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="bi">range</span>(<span class="bi">len</span>(<span class="var">datos</span>)):
+  <span class="kw">for</span> <span class="var">j</span> <span class="kw">in</span> <span class="bi">range</span>(<span class="bi">len</span>(<span class="var">datos</span>)):
+    <span class="kw">if</span> <span class="var">datos</span>[<span class="var">j</span>] > <span class="var">datos</span>[<span class="var">i</span>]:
+      <span class="var">tmp</span> <span class="op">=</span> <span class="var">datos</span>[<span class="var">i</span>]
+      <span class="var">datos</span>[<span class="var">i</span>] <span class="op">=</span> <span class="var">datos</span>[<span class="var">j</span>]
+      <span class="var">datos</span>[<span class="var">j</span>] <span class="op">=</span> <span class="var">tmp</span>
+
+<span class="cmt"># ❌ No sabemos si original fue modificado</span>
+<span class="bi">print</span>(<span class="var">datos</span>)
+
+<span class="cmt"># ❌ Para objetos complejos, no funciona</span>
+<span class="var">personas</span> <span class="op">=</span> [(<span class="str">"Ana"</span>, <span class="num">30</span>), (<span class="str">"Luis"</span>, <span class="num">25</span>)]
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="bi">range</span>(<span class="bi">len</span>(<span class="var">personas</span>)):
+  <span class="kw">for</span> <span class="var">j</span> <span class="kw">in</span> <span class="bi">range</span>(<span class="bi">len</span>(<span class="var">personas</span>)):
+    <span class="kw">if</span> <span class="var">personas</span>[<span class="var">j</span>][<span class="num">1</span>] > <span class="var">personas</span>[<span class="var">i</span>][<span class="num">1</span>]:
+      <span class="var">personas</span>[<span class="var">i</span>], <span class="var">personas</span>[<span class="var">j</span>] <span class="op">=</span> \
+        <span class="var">personas</span>[<span class="var">j</span>], <span class="var">personas</span>[<span class="var">i</span>]</pre>
+    </div>
+    <div class="compare-col good">
+      <div class="compare-header"><span class="compare-icon">✓</span> CÓDIGO OPTIMIZADO</div>
+<pre><span class="cmt"># .sort() — in-place: modifica la lista</span>
+<span class="cmt"># sorted() — retorna nueva lista sin tocar</span>
+<span class="cmt"># la original. Timsort O(n log n).</span>
+<span class="var">datos</span> <span class="op">=</span> [<span class="num">5</span>, <span class="num">2</span>, <span class="num">8</span>, <span class="num">1</span>, <span class="num">9</span>]
+
+<span class="cmt"># ✅ sorted(): original intacta</span>
+<span class="var">nueva</span> <span class="op">=</span> <span class="fn">sorted</span>(<span class="var">datos</span>)
+<span class="bi">print</span>(<span class="var">datos</span>)   <span class="cmt"># [5, 2, 8, 1, 9] — sin cambios</span>
+<span class="bi">print</span>(<span class="var">nueva</span>)   <span class="cmt"># [1, 2, 5, 8, 9] — nueva lista</span>
+
+<span class="cmt"># ✅ .sort(): modifica in-place, + rápido</span>
+<span class="var">datos</span>.<span class="fn">sort</span>(reverse<span class="op">=</span><span class="kw">True</span>)
+<span class="bi">print</span>(<span class="var">datos</span>)   <span class="cmt"># [9, 8, 5, 2, 1]</span>
+
+<span class="cmt"># ✅ Objetos complejos: key=lambda</span>
+<span class="var">personas</span> <span class="op">=</span> [(<span class="str">"Ana"</span>, <span class="num">30</span>), (<span class="str">"Luis"</span>, <span class="num">25</span>)]
+<span class="var">por_edad</span> <span class="op">=</span> <span class="fn">sorted</span>(
+  <span class="var">personas</span>,
+  key<span class="op">=</span><span class="kw">lambda</span> <span class="var">p</span>: <span class="var">p</span>[<span class="num">1</span>]  <span class="cmt"># ordena por edad</span>
+)
+<span class="bi">print</span>(<span class="var">por_edad</span>)
+<span class="cmt"># [('Luis', 25), ('Ana', 30)]</span></pre>
+    </div>
+  </div>
+
+  <!-- [C] Diagrama de flujo Bubble Sort -->
+  <div class="section-label"><span class="t-prompt">&gt;</span> RUTA LÓGICA: DIAGRAMA DE FLUJO</div>
+  <div class="flowchart">
+    <div class="flow-row">
+      <div class="flow-box start">LISTA INICIAL<br><small>[5, 2, 9, 1]</small></div>
+    </div>
+    <div class="flow-row"><span class="flow-arrow">▼</span></div>
+    <div class="flow-row">
+      <div class="flow-box" style="border-color: var(--blue);"><strong>[1] Bucle Exterior (i)</strong><br><small>intercambiado = False</small></div>
+    </div>
+    <div class="flow-row"><span class="flow-arrow">▼</span></div>
+    <div class="flow-row">
+      <div class="flow-box decision" style="border-color: var(--cyan);"><strong>[2] Bucle Interior (j)</strong><br><small>¿Quedan pares por comparar?</small></div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-branch">
+        
+        <div class="flow-col">
+          <span class="flow-label" style="color:var(--blue);">SÍ (Evaluar par)</span>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box">v1 = lista[j], v2 = lista[j+1]</div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box decision">¿v1 > v2?<br><small>(¿Desordenados?)</small></div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-branch" style="gap: 1rem;">
+            <div class="flow-col">
+              <span class="flow-label" style="color:var(--green);">NO ✓</span>
+              <span class="flow-arrow">▼</span>
+              <div class="flow-box">Mantener orden</div>
+              <span class="flow-arrow">▼</span>
+              <div class="flow-box" style="background: rgba(255,255,255,0.03);"><strong>⟲ Volver a [2]</strong></div>
+            </div>
+            <div class="flow-col">
+              <span class="flow-label" style="color:var(--red);">SÍ ✗</span>
+              <span class="flow-arrow">▼</span>
+              <div class="flow-box action">INTERCAMBIAR<br><small>intercambiado = True</small></div>
+              <span class="flow-arrow">▼</span>
+              <div class="flow-box" style="background: rgba(255,255,255,0.03);"><strong>⟲ Volver a [2]</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-col">
+          <span class="flow-label" style="color:var(--green);">NO (Fin de pasada)</span>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box decision">¿intercambiado == False?</div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-branch" style="gap: 1rem;">
+            <div class="flow-col">
+              <span class="flow-label" style="color:var(--red);">NO (Hubo cambios)</span>
+              <span class="flow-arrow">▼</span>
+              <div class="flow-box"><strong>⟲ Volver a [1]</strong></div>
+            </div>
+            <div class="flow-col">
+              <span class="flow-label" style="color:var(--green);">SÍ (Ordenado)</span>
+              <span class="flow-arrow">▼</span>
+              <div class="flow-box end">✓ FIN (break)</div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- [D] Simulación de terminal -->
+  <div class="terminal-window">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r" title="Cerrar"></span><span class="dot y" title="Minimizar"></span><span class="dot g" title="Maximizar"></span></div>
+      <div class="terminal-title">SALIDA DE CONSOLA SIMULADA</div>
+    </div>
+    <div class="terminal-header">
+      <div class="terminal-tabs">
+        <span class="terminal-tab active">bubble_sort.py</span>
+        <span class="terminal-tab">output.log</span>
+        <span class="terminal-tab">notes</span>
+      </div>
+    </div>
+    <div class="terminal-body">
+      <div class="tl"><span class="t-prompt">&gt;</span> <span class="t-cmd">EJECUTANDO: bubble_sort.py</span></div>
+      <div class="tl"><span class="t-out">=== BUBBLE SORT EN ACCIÓN ===</span></div>
+      <div class="tl"><span class="t-out">Lista a ordenar: [5, 2, 9, 1]</span></div>
+      <div class="tl"><span class="t-out">[Paso 1] Analizando [5, 2]... ¡Se mueven! Lista actual: [2, 5, 9, 1]</span></div>
+      <div class="tl"><span class="t-out">[Paso 2] Analizando [5, 9]... Todo bien.</span></div>
+      <div class="tl"><span class="t-out">[Paso 3] Analizando [9, 1]... ¡Se mueven! Lista actual: [2, 5, 1, 9]</span></div>
+      <div class="tl"><span class="t-out">&gt; Fin de la ronda 1. Progreso: [2, 5, 1, 9]</span></div>
+      <div class="tl"><span class="t-out">[Paso 4] Analizando [2, 5]... Todo bien.</span></div>
+      <div class="tl"><span class="t-out">[Paso 5] Analizando [5, 1]... ¡Se mueven! Lista actual: [2, 1, 5, 9]</span></div>
+      <div class="tl"><span class="t-out">&gt; Fin de la ronda 2. Progreso: [2, 1, 5, 9]</span></div>
+      <div class="tl"><span class="t-out">[Paso 6] Analizando [2, 1]... ¡Se mueven! Lista actual: [1, 2, 5, 9]</span></div>
+      <div class="tl"><span class="t-out">&gt; Fin de la ronda 3. Progreso: [1, 2, 5, 9]</span></div>
+      <div class="tl"><span class="t-out">&gt; Fin de la ronda 4. Progreso: [1, 2, 5, 9]</span></div>
+      <div class="tl"><span class="t-out">=== RESULTADO FINAL ===</span></div>
+      <div class="tl"><span class="t-out">Lista ordenada: [1, 2, 5, 9]</span></div>
+      <div class="tl"><span class="t-out">============================================================</span></div>
+      <div class="tl"><span class="t-out">--- Analizando .sort() ---</span></div>
+      <div class="tl"><span class="t-out">Original: [88, 45, 100, 33]</span></div>
+      <div class="tl"><span class="t-out">Después de .sort(): [33, 45, 88, 100] (La lista original cambió)</span></div>
+      <div class="tl"><span class="t-out">Valor devuelto: None (Por eso nunca debes hacer x = lista.sort())</span></div>
+      <div class="tl"><span class="t-out">--- Analizando sorted() ---</span></div>
+      <div class="tl"><span class="t-out">Original: ('u', 'e', 'o', 'a', 'i')</span></div>
+      <div class="tl"><span class="t-out">La nueva lista: ['a', 'e', 'i', 'o', 'u']</span></div>
+      <div class="tl"><span class="t-out">La original intacta: ('u', 'e', 'o', 'a', 'i')</span></div>
+    </div>
+  </div>
+
+  <!-- [E] Snippet de código -->
+  <div class="snippet-wrap">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r" title="Cerrar"></span><span class="dot y" title="Minimizar"></span><span class="dot g" title="Maximizar"></span></div>
+      <div class="terminal-title">INSPECCIÓN DE CÓDIGO FUENTE</div>
+    </div>
+    <div class="snippet-toolbar">
+      <div class="snippet-tabs">
+        <span class="snippet-tab active">bubble_sort.py</span>
+        <span class="snippet-tab">terminal</span>
+        <span class="snippet-tab">README</span>
+      </div>
+      <div class="snippet-header">
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="copy-btn run-btn" onclick="runSimulation(this)">▶ EJECUTAR</button>
+          <button class="copy-btn" onclick="copyCode(this, 'code1')">📋 COPIAR CÓDIGO</button>
+        </div>
+      </div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-lines" id="code1">
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ==========================================</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># 1. BUBBLE SORT</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ==========================================</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">mi_lista</span> <span class="op">=</span> [<span class="num">5</span>, <span class="num">2</span>, <span class="num">9</span>, <span class="num">1</span>]</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">n</span> <span class="op">=</span> <span class="bi">len</span>(<span class="var">mi_lista</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">paso</span> <span class="op">=</span> <span class="num">1</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">"=== BUBBLE SORT EN ACCIÓN ==="</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"Lista a ordenar: {mi_lista}\n"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="bi">range</span>(<span class="var">n</span>):</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="var">intercambiado</span> <span class="op">=</span> <span class="kw">False</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">for</span> <span class="var">j</span> <span class="kw">in</span> <span class="bi">range</span>(<span class="var">n</span> <span class="op">-</span> <span class="num">1</span> <span class="op">-</span> <span class="var">i</span>):</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="var">v1</span>, <span class="var">v2</span> <span class="op">=</span> <span class="var">mi_lista</span>[<span class="var">j</span>], <span class="var">mi_lista</span>[<span class="var">j</span><span class="op">+</span><span class="num">1</span>]</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">if</span> <span class="var">v1</span> <span class="op">&gt;</span> <span class="var">v2</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Si el primero es mayor, los intercambiamos</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="var">mi_lista</span>[<span class="var">j</span>], <span class="var">mi_lista</span>[<span class="var">j</span><span class="op">+</span><span class="num">1</span>] <span class="op">=</span> <span class="var">mi_lista</span>[<span class="var">j</span><span class="op">+</span><span class="num">1</span>], <span class="var">mi_lista</span>[<span class="var">j</span>]</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="bi">print</span>(<span class="str">f"[Paso {paso}] Analizando [{v1}, {v2}]... ¡Se mueven! Lista actual: {mi_lista}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="var">intercambiado</span> <span class="op">=</span> <span class="kw">True</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">else</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Si ya están en orden, no hacemos nada</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="bi">print</span>(<span class="str">f"[Paso {paso}] Analizando [{v1}, {v2}]... Todo bien."</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="var">paso</span> <span class="op">+=</span> <span class="num">1</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="cmt"># Resumen al final de cada recorrido</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="str">f"&gt; Fin de la ronda {i + 1}. Progreso: {mi_lista}\n"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">if</span> <span class="kw">not</span> <span class="var">intercambiado</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">break</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"=== RESULTADO FINAL ===\nLista ordenada: {mi_lista}\n"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">"=" * 60</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ==========================================</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># 2. EJEMPLO DE .sort()</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ==========================================</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">"\n--- Analizando .sort() ---"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">puntajes</span> <span class="op">=</span> [<span class="num">88</span>, <span class="num">45</span>, <span class="num">100</span>, <span class="num">33</span>]</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"Original: {puntajes}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">resultado_metodo</span> <span class="op">=</span> <span class="var">puntajes</span>.<span class="fn">sort</span>() <span class="cmt"># Ordenamos la lista directamente</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"Después de .sort(): {puntajes} (La lista original cambió)"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"Valor devuelto: {resultado_metodo} (Por eso nunca debes hacer x = lista.sort())"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ==========================================</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># 3. EJEMPLO DE sorted()</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ==========================================</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">"\n--- Analizando sorted() ---"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">vocales</span> <span class="op">=</span> (<span class="str">'u'</span>, <span class="str">'e'</span>, <span class="str">'o'</span>, <span class="str">'a'</span>, <span class="str">'i'</span>) <span class="cmt"># Esto es una tupla, no tiene .sort()</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"Original: {vocales}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># Usamos la función para generar una lista nueva</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">nueva_lista</span> <span class="op">=</span> <span class="fn">sorted</span>(<span class="var">vocales</span>) </div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"La nueva lista: {nueva_lista}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="bi">print</span>(<span class="str">f"La original intacta: {vocales}"</span>)</div></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MÓDULO 2: GESTIÓN DE EXCEPCIONES
+════════════════════════════════════════════════════════════ -->
+<section class="module" id="mod2">
+
+  <!-- [A] Encabezado -->
+  <div class="module-header">
+    <div class="module-num"><span class="t-prompt">&gt;</span> MÓDULO 02</div>
+    <h2 class="module-title"><span class="accent">Gestión</span> de Excepciones</h2>
+    <div class="module-def">
+      Las excepciones no tratadas provocan el cierre forzoso de un programa. El bloque <strong>try/except/finally</strong> es el escudo protector que intercepta estos fallos antes de que destruyan la ejecución.
+      <br><br>
+      <strong>¿Porqué?</strong> Cada bloque tiene un rol vital en la memoria y el procesador. El <strong>try</strong> crea una "zona de pruebas"; monitorea el código y no penaliza el rendimiento si todo sale bien. El <strong>except</strong> es el interceptor: si algo falla, en lugar de que el programa colapse enviando un volcado de memoria (<em>traceback</em>) al Sistema Operativo, captura ese "objeto de error" específico (ej. <code>ValueError</code>) y desvía el flujo hacia una solución segura. Finalmente, el <strong>finally</strong> es la limpieza garantizada por el intérprete (CPython): sin importar si hubo un error fatal o un <code>return</code> prematuro, la computadora está forzada a ejecutar este bloque para quitar "candados" a los archivos y liberar memoria, evitando que la máquina se quede sin recursos.
+    </div>
+  </div>
+
+  <!-- [B] Antes vs Después -->
+  <div class="section-label"><span class="t-prompt">&gt;</span> COMPARATIVA: ANTES VS DESPUÉS</div>
+  <div class="compare-grid">
+    <div class="compare-col bad">
+      <div class="compare-header"><span class="compare-icon">✗</span> CÓDIGO INEFICIENTE</div>
+<pre><span class="cmt"># Sin manejo de errores: el programa</span>
+<span class="cmt"># rompe con un traceback crudo y feo.</span>
+
+<span class="cmt"># ❌ Esto crashea si el usuario escribe "abc"</span>
+<span class="var">numero</span> <span class="op">=</span> <span class="bi">int</span>(<span class="bi">input</span>(<span class="str">"Ingrese número: "</span>))
+
+<span class="cmt"># ❌ Crashea si el archivo no existe</span>
+<span class="var">f</span> <span class="op">=</span> <span class="bi">open</span>(<span class="str">"datos.txt"</span>)
+<span class="var">contenido</span> <span class="op">=</span> <span class="var">f</span>.<span class="fn">read</span>()
+
+<span class="cmt"># ❌ Crashea si divisor es cero</span>
+<span class="var">divisor</span> <span class="op">=</span> <span class="bi">int</span>(<span class="bi">input</span>(<span class="str">"Divisor: "</span>))
+<span class="var">result</span> <span class="op">=</span> <span class="var">numero</span> <span class="op">/</span> <span class="var">divisor</span>
+
+<span class="cmt"># El archivo NUNCA se cierra si hay error</span>
+<span class="var">f</span>.<span class="fn">close</span>()
+
+<span class="cmt">"""
+Traceback (most recent call last):
+  File "script.py", line 4
+ValueError: invalid literal for int()
+"""</span></pre>
+    </div>
+    <div class="compare-col good">
+      <div class="compare-header"><span class="compare-icon">✓</span> CÓDIGO OPTIMIZADO</div>
+<pre><span class="cmt"># try/except/finally: manejo elegante</span>
+<span class="cmt"># Mensajes claros, flujo controlado.</span>
+
+<span class="var">archivo</span> <span class="op">=</span> <span class="kw">None</span>
+<span class="kw">try</span>:
+    <span class="cmt"># ✅ Captura si no es número válido</span>
+    <span class="var">numero</span> <span class="op">=</span> <span class="bi">int</span>(<span class="bi">input</span>(<span class="str">"Ingrese número: "</span>))
+
+    <span class="cmt"># ✅ Captura si el archivo no existe</span>
+    <span class="var">archivo</span> <span class="op">=</span> <span class="bi">open</span>(<span class="str">"datos.txt"</span>)
+    <span class="var">contenido</span> <span class="op">=</span> <span class="var">archivo</span>.<span class="fn">read</span>()
+
+    <span class="cmt"># ✅ Captura si divisor es cero</span>
+    <span class="var">divisor</span> <span class="op">=</span> <span class="bi">int</span>(<span class="bi">input</span>(<span class="str">"Divisor: "</span>))
+    <span class="var">result</span> <span class="op">=</span> <span class="var">numero</span> <span class="op">/</span> <span class="var">divisor</span>
+
+<span class="kw">except</span> <span class="cls">ValueError</span> <span class="kw">as</span> <span class="var">e</span>:
+    <span class="bi">print</span>(<span class="str">f"⚠ ERROR: Valor inválido → {e}"</span>)
+<span class="kw">except</span> <span class="cls">FileNotFoundError</span>:
+    <span class="bi">print</span>(<span class="str">"⚠ ERROR: Archivo no encontrado"</span>)
+<span class="kw">except</span> <span class="cls">ZeroDivisionError</span>:
+    <span class="bi">print</span>(<span class="str">"⚠ ERROR: División por cero"</span>)
+<span class="kw">finally</span>:
+    <span class="cmt"># ✅ Siempre se ejecuta: limpieza segura</span>
+    <span class="kw">if</span> <span class="var">archivo</span>: <span class="var">archivo</span>.<span class="fn">close</span>()
+    <span class="bi">print</span>(<span class="str">"[finally] Recursos liberados."</span>)</pre>
+    </div>
+  </div>
+
+  <!-- [C] Diagrama de flujo -->
+  <div class="section-label"><span class="t-prompt">&gt;</span> RUTA LÓGICA: TRY/EXCEPT/FINALLY</div>
+  <div class="flowchart">
+    <div class="flow-row">
+      <div class="flow-box start">INPUT del usuario</div>
+    </div>
+    <div class="flow-row"><span class="flow-arrow">▼</span></div>
+    <div class="flow-row">
+      <div class="flow-box">Bloque TRY</div>
+    </div>
+    <div class="flow-row"><span class="flow-arrow">▼</span></div>
+    <div class="flow-row">
+      <div class="flow-box decision">¿Se lanzó una excepción?</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-branch">
+        <div class="flow-col">
+          <span class="flow-label" style="color:var(--green);">NO ✓</span>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box">Ejecutar lógica completa</div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box fin">Bloque FINALLY</div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box end">✓ Continúa</div>
+        </div>
+        <div class="flow-col" style="gap:0.4rem;">
+          <span class="flow-label" style="color:var(--red);">SÍ ✗</span>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box error">EXCEPT ValueError<br><small>"abc" no es número</small></div>
+          <span class="flow-arrow" style="font-size:11px;">también puede ser:</span>
+          <div class="flow-box error">EXCEPT FileNotFoundError<br><small>archivo no existe</small></div>
+          <span class="flow-arrow" style="font-size:11px;">también puede ser:</span>
+          <div class="flow-box error">EXCEPT ZeroDivisionError<br><small>divisor es 0</small></div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box">Mensaje amigable al usuario</div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box fin">Bloque FINALLY</div>
+          <span class="flow-arrow">▼</span>
+          <div class="flow-box decision">¿Reintentar?</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- [D] Simulación terminal -->
+  <div class="terminal-window">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r" title="Cerrar"></span><span class="dot y" title="Minimizar"></span><span class="dot g" title="Maximizar"></span></div>
+      <div class="terminal-title">SALIDA DE CONSOLA SIMULADA</div>
+    </div>
+    <div class="terminal-header">
+      <div class="terminal-tabs">
+        <span class="terminal-tab active">calculadora.py</span>
+        <span class="terminal-tab">debug.log</span>
+        <span class="terminal-tab">stack</span>
+      </div>
+    </div>
+    <div class="terminal-body">
+      <div class="tl"><span class="t-prompt">&gt;</span> <span class="t-cmd">EJECUTANDO: calculadora.py</span></div>
+      <div class="tl"><span class="t-warn">=== CALCULADORA BÁSICA PARA DIVISIONES ===</span></div>
+      <div class="tl"><span class="t-out">Ingresa el primer número: </span><span class="t-warn">diez</span></div>
+      <div class="tl"><span class="t-err">✗ ERROR [ValueError]: Por favor, ingresa solo números.</span></div>
+      <div class="tl"><span class="t-fin">⚡ [finally] Limpiando memoria de la calculadora...</span></div>
+      <div class="tl"><span class="t-sep">──────────────────────────────────────────</span></div>
+      <div class="tl"><span class="t-warn">=== CALCULADORA BÁSICA PARA DIVISIONES ===</span></div>
+      <div class="tl"><span class="t-out">Ingresa el primer número: </span><span class="t-cmd">10</span></div>
+      <div class="tl"><span class="t-out">Ingresa el segundo número: </span><span class="t-warn">0</span></div>
+      <div class="tl"><span class="t-err">✗ ERROR [ZeroDivisionError]: No se puede dividir entre cero.</span></div>
+      <div class="tl"><span class="t-fin">⚡ [finally] Limpiando memoria de la calculadora...</span></div>
+      <div class="tl"><span class="t-sep">──────────────────────────────────────────</span></div>
+      <div class="tl"><span class="t-warn">=== CALCULADORA BÁSICA PARA DIVISIONES ===</span></div>
+      <div class="tl"><span class="t-out">Ingresa el primer número: </span><span class="t-cmd">10</span></div>
+      <div class="tl"><span class="t-out">Ingresa el segundo número: </span><span class="t-cmd">2</span></div>
+      <div class="tl"><span class="t-ok">✓ ÉXITO: El resultado de 10 / 2 es 5.0</span></div>
+      <div class="tl"><span class="t-fin">⚡ [finally] Limpiando memoria de la calculadora...</span></div>
+    </div>
+  </div>
+
+  <!-- [E] Snippet -->
+  <div class="snippet-wrap">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r" title="Cerrar"></span><span class="dot y" title="Minimizar"></span><span class="dot g" title="Maximizar"></span></div>
+      <div class="terminal-title">INSPECCIÓN DE CÓDIGO FUENTE</div>
+    </div>
+    <div class="snippet-toolbar">
+      <div class="snippet-tabs">
+        <span class="snippet-tab active">gestor_errores.py</span>
+        <span class="snippet-tab">terminal</span>
+        <span class="snippet-tab">README</span>
+      </div>
+      <div class="snippet-header">
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="copy-btn run-btn" onclick="runSimulation(this)">▶ EJECUTAR</button>
+          <button class="copy-btn" onclick="copyCode(this, 'code2')">📋 COPIAR CÓDIGO</button>
+        </div>
+      </div>
+    </div>
+    <div class="snippet-body">
+      <div class="code-lines" id="code2">
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ═══════════════════════════════════════════════════════</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># Modulo 02 | Gestión de Excepciones en Terminal</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># Python — Calculadora Segura</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ═══════════════════════════════════════════════════════</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># Códigos ANSI para colores</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">ROJO</span> <span class="op">=</span> <span class="str">"\033[91m"</span>; <span class="var">VERDE</span> <span class="op">=</span> <span class="str">"\033[92m"</span>; <span class="var">MAGENTA</span> <span class="op">=</span> <span class="str">"\033[95m"</span>; <span class="var">RESET</span> <span class="op">=</span> <span class="str">"\033[0m"</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">def</span> <span class="fn">calculadora_segura</span>():</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="str">"""Una calculadora básica a prueba de fallos para principiantes."""</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">while True</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="bi">print</span>(<span class="str">f"\n{VERDE}=== CALCULADORA BÁSICA PARA DIVISIONES ==={RESET}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">try</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Solicitamos los datos al usuario</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="var">num1</span> <span class="op">=</span> <span class="bi">int</span>(<span class="bi">input</span>(<span class="str">"Ingresa el primer número: "</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="var">num2</span> <span class="op">=</span> <span class="bi">int</span>(<span class="bi">input</span>(<span class="str">"Ingresa el segundo número: "</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Intentamos hacer la operación matemática</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="var">resultado</span> <span class="op">=</span> <span class="var">num1</span> <span class="op">/</span> <span class="var">num2</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Si llegamos aquí, NADA falló</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="bi">print</span>(<span class="str">f"{VERDE}✓ ÉXITO: El resultado de {num1} / {num2} es {resultado}{RESET}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="kw">break</span>  <span class="cmt"># Rompemos el bucle infinito porque tuvimos éxito</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">except</span> <span class="cls">ValueError</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Ocurre si escriben letras o símbolos en vez de números</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="bi">print</span>(<span class="str">f"{ROJO}✗ ERROR [ValueError]: Por favor, ingresa solo números.{RESET}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">except</span> <span class="cls">ZeroDivisionError</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Ocurre si el segundo número (num2) es un cero</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="bi">print</span>(<span class="str">f"{ROJO}✗ ERROR [ZeroDivisionError]: No se puede dividir entre cero.{RESET}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="kw">finally</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="cmt"># Esto SIEMPRE se imprime, sin importar si hubo error o éxito</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">            <span class="bi">print</span>(<span class="str">f"{MAGENTA}⚡ [finally] Limpiando memoria de la calculadora...{RESET}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">if</span> <span class="var">__name__</span> <span class="op">==</span> <span class="str">"__main__"</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="fn">calculadora_segura</span>()</div></div>
+      </div>
+
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MÓDULO 3: F-STRINGS Y REPORTES PROFESIONALES
+════════════════════════════════════════════════════════════ -->
+<section class="module" id="mod3">
+
+  <!-- [A] Encabezado -->
+  <div class="module-header">
+    <div class="module-num"><span class="t-prompt">&gt;</span> MÓDULO 03</div>
+    <h2 class="module-title"><span class="accent">F-Strings</span> y Reportes Profesionales</h2>
+    <div class="module-def">
+      Los <strong>f-strings</strong> (<em>Formatted String Literals</em>, Python) revolucionaron la presentación de datos, dejando obsoletos tanto a la concatenación tradicional (<code>+</code>) como a los métodos antiguos como <code>.format()</code>.
+      <br><br>
+      <strong>¿Porqué?</strong> A diferencia de los métodos clásicos que obligan al intérprete a buscar marcadores temporales y mapear variables en un proceso lento de múltiples pasos, los f-strings son evaluados <em>en tiempo de ejecución</em>. Cuando Python lee un f-string, no lo ve como texto muerto, sino que compila las expresiones matemáticas o variables dentro de las llaves <code>{}</code> directamente en operaciones rápidas a nivel de lenguaje C. Además, resuelven el problema de la memoria: como los textos son inmutables, sumarlos con <code>+</code> genera copias basura constantes; el f-string calcula el tamaño final y pide la memoria de un solo golpe. Por último, su <em>Mini-Lenguaje de Formato</em> (ej. <code>:>9.2f</code>) traslada tareas pesadas como alinear, rellenar con ceros o redondear decimales al motor interno, ahorrándote el escribir código ineficiente a mano.
+    </div>
+  </div>
+
+  <!-- [B] Antes vs Después -->
+  <div class="section-label"><span class="t-prompt">&gt;</span> COMPARATIVA: ANTES VS DESPUÉS</div>
+  <div class="compare-grid">
+    <div class="compare-col bad">
+      <div class="compare-header"><span class="compare-icon">✗</span> CÓDIGO INEFICIENTE</div>
+<pre><span class="cmt"># Concatenación con + y % formatting</span>
+<span class="cmt"># Difícil de leer, sin control de formato.</span>
+
+<span class="var">precio</span> <span class="op">=</span> <span class="num">1234.5678</span>
+<span class="var">nombre</span> <span class="op">=</span> <span class="str">"Laptop"</span>
+
+<span class="cmt"># ❌ Concatenación cruda — incómodo</span>
+<span class="bi">print</span>(<span class="str">"Producto: "</span> <span class="op">+</span> <span class="var">nombre</span> <span class="op">+</span>
+      <span class="str">" | Precio: $"</span> <span class="op">+</span> <span class="bi">str</span>(<span class="bi">round</span>(<span class="var">precio</span>, <span class="num">2</span>)))
+
+<span class="cmt"># ❌ % formatting — anticuado</span>
+<span class="bi">print</span>(<span class="str">"%-15s $%8.2f"</span> <span class="op">%</span> (<span class="var">nombre</span>, <span class="var">precio</span>))
+
+<span class="cmt"># ❌ Sin control de alineación</span>
+<span class="kw">for</span> <span class="var">item</span> <span class="kw">in</span> [(<span class="str">"Pan"</span>,<span class="num">1.5</span>),(<span class="str">"Leche"</span>,<span class="num">200</span>)]:
+  <span class="bi">print</span>(<span class="var">item</span>[<span class="num">0</span>] <span class="op">+</span> <span class="str">"   $"</span> <span class="op">+</span> <span class="bi">str</span>(<span class="var">item</span>[<span class="num">1</span>]))
+  <span class="cmt"># Columnas desalineadas, poco legible</span>
+
+<span class="cmt"># Salida:
+# Pan   $1.5
+# Leche   $200     ← desalineado</span></pre>
+    </div>
+    <div class="compare-col good">
+      <div class="compare-header"><span class="compare-icon">✓</span> CÓDIGO OPTIMIZADO</div>
+<pre><span class="cmt"># f-strings con especificadores de formato</span>
+<span class="cmt"># Legible, preciso y potente.</span>
+
+<span class="var">precio</span> <span class="op">=</span> <span class="num">1234.5678</span>
+<span class="var">nombre</span> <span class="op">=</span> <span class="str">"Laptop"</span>
+
+<span class="cmt"># ✅ Redondeo a 2 decimales</span>
+<span class="bi">print</span>(<span class="str">f"Precio: ${precio:.2f}"</span>)   <span class="cmt"># $1234.57</span>
+
+<span class="cmt"># ✅ Alineación izquierda 20 chars</span>
+<span class="bi">print</span>(<span class="str">f"{nombre:&lt;20}| ok"</span>)      <span class="cmt"># "Laptop               | ok"</span>
+
+<span class="cmt"># ✅ Alineación derecha</span>
+<span class="bi">print</span>(<span class="str">f"{nombre:&gt;20}"</span>)         <span class="cmt"># "              Laptop"</span>
+
+<span class="cmt"># ✅ Centrado</span>
+<span class="bi">print</span>(<span class="str">f"{nombre:^20}"</span>)         <span class="cmt"># "       Laptop       "</span>
+
+<span class="cmt"># ✅ Relleno con ceros</span>
+<span class="bi">print</span>(<span class="str">f"Ticket #{42:0>6}"</span>)       <span class="cmt"># Ticket #000042</span>
+
+<span class="cmt"># ✅ Separador de miles</span>
+<span class="bi">print</span>(<span class="str">f"Stock: {1000000:,}"</span>)     <span class="cmt"># Stock: 1,000,000</span></pre>
+    </div>
+  </div>
+
+  <!-- [C] Infografía anatomía f-string -->
+  <div class="section-label"><span class="t-prompt">&gt;</span> ESTRUCTURA: ANATOMÍA DEL F-STRING</div>
+  <div class="fstring-anatomy">
+    <div class="fstring-display">
+      <span style="color:var(--text-dim);">f"</span><span style="color:var(--text);">{</span>
+      <span style="color:var(--cyan);">variable</span>
+      <span style="color:var(--text-dim);"> : </span>
+      <span style="color:var(--magenta);">relleno</span>
+      <span style="color:var(--yellow);">alineación</span>
+      <span style="color:var(--blue);">ancho</span>
+      <span style="color:var(--text-dim);">.</span>
+      <span style="color:var(--green);">precisión</span>
+      <span style="color:var(--red);">tipo</span>
+      <span style="color:var(--text);">}</span><span style="color:var(--text-dim);">"</span>
+    </div>
+    <div class="fstring-parts">
+      <div class="fstr-part fstr-var">
+        <span class="label">VARIABLE</span>
+        <code>precio</code>
+        <span class="example">Expresión Python</span>
+      </div>
+      <div class="fstr-part fstr-fill">
+        <span class="label">RELLENO</span>
+        <code>0 · * · ─</code>
+        <span class="example">carácter de relleno</span>
+      </div>
+      <div class="fstr-part fstr-align">
+        <span class="label">ALINEACIÓN</span>
+        <code>&lt; · &gt; · ^</code>
+        <span class="example">izq · der · centro</span>
+      </div>
+      <div class="fstr-part fstr-width">
+        <span class="label">ANCHO</span>
+        <code>10 · 20 · 8</code>
+        <span class="example">mínimo de caracteres</span>
+      </div>
+      <div class="fstr-part fstr-prec">
+        <span class="label">PRECISIÓN</span>
+        <code>.2 · .4</code>
+        <span class="example">decimales a mostrar</span>
+      </div>
+      <div class="fstr-part fstr-type">
+        <span class="label">TIPO</span>
+        <code>f · d · s · ,</code>
+        <span class="example">float · int · str</span>
+      </div>
+    </div>
+    <table class="fstr-table">
+      <tr>
+        <th>Especificador</th>
+        <th>Ejemplo de código</th>
+        <th>Resultado</th>
+        <th>Descripción</th>
+      </tr>
+      <tr>
+        <td><span class="grn">:.2f</span></td>
+        <td><code>f"{3.14159:.2f}"</code></td>
+        <td><span style="color:var(--cyan);">3.14</span></td>
+        <td>Redondeo a 2 decimales</td>
+      </tr>
+      <tr>
+        <td><span class="grn">:&lt;20</span></td>
+        <td><code>f"{'Pan':&lt;20}"</code></td>
+        <td><span style="color:var(--cyan);">Pan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+        <td>Alineación izquierda, 20 chars</td>
+      </tr>
+      <tr>
+        <td><span class="grn">:&gt;20</span></td>
+        <td><code>f"{'Pan':&gt;20}"</code></td>
+        <td><span style="color:var(--cyan);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pan</span></td>
+        <td>Alineación derecha, 20 chars</td>
+      </tr>
+      <tr>
+        <td><span class="grn">:^20</span></td>
+        <td><code>f"{'Pan':^20}"</code></td>
+        <td><span style="color:var(--cyan);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
+        <td>Centrado en 20 chars</td>
+      </tr>
+      <tr>
+        <td><span class="grn">:0&gt;8</span></td>
+        <td><code>f"{42:0>8}"</code></td>
+        <td><span style="color:var(--cyan);">00000042</span></td>
+        <td>Relleno con ceros a la izquierda</td>
+      </tr>
+      <tr>
+        <td><span class="grn">:,</span></td>
+        <td><code>f"{1000000:,}"</code></td>
+        <td><span style="color:var(--cyan);">1,000,000</span></td>
+        <td>Separador de miles</td>
+      </tr>
+    </table>
+  </div>
+
+
+  <!-- [D] Simulación terminal -->
+  <div class="terminal-window">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r" title="Cerrar"></span><span class="dot y" title="Minimizar"></span><span class="dot g" title="Maximizar"></span></div>
+      <div class="terminal-title">SALIDA DE CONSOLA SIMULADA</div>
+    </div>
+    <div class="terminal-header">
+      <div class="terminal-tabs">
+        <span class="terminal-tab active">reporte.py</span>
+        <span class="terminal-tab">ticket.txt</span>
+        <span class="terminal-tab">stats</span>
+      </div>
+    </div>
+    <div class="terminal-body">
+      <div class="tl"><span class="t-prompt">&gt;</span> <span class="t-cmd">EJECUTANDO: reporte.py</span></div>
+      <div class="tl"><span class="t-ticket">╔══════════════════════════════════════════╗</span></div>
+      <div class="tl"><span class="t-ticket">║         TICKET DE VENTA  #000042         ║</span></div>
+      <div class="tl"><span class="t-ticket">╠══════════════════════════════════════════╣</span></div>
+      <div class="tl"><span class="t-ticket">║  Producto              Cant.    Precio   ║</span></div>
+      <div class="tl"><span class="t-ticket">╠══════════════════════════════════════════╣</span></div>
+      <div class="tl"><span class="t-ticket">║  Manzanas                3    $   1.50   ║</span></div>
+      <div class="tl"><span class="t-ticket">║  Pan integral            1    $   2.99   ║</span></div>
+      <div class="tl"><span class="t-ticket">║  Leche 1L                2    $   1.20   ║</span></div>
+      <div class="tl"><span class="t-ticket">║  Jugo naranja            4    $   0.99   ║</span></div>
+      <div class="tl"><span class="t-ticket">╠══════════════════════════════════════════╣</span></div>
+      <div class="tl"><span class="t-ticket">║  SUBTOTAL:                   $   13.85   ║</span></div>
+      <div class="tl"><span class="t-ticket">║  IVA (19%):                  $    2.63   ║</span></div>
+      <div class="tl"><span class="t-ticket">╠══════════════════════════════════════════╣</span></div>
+      <div class="tl"><span class="t-ok" style="white-space: pre; font-family: var(--font);">║  TOTAL:                      $   16.48   ║</span></div>
+      <div class="tl"><span class="t-ticket">╚══════════════════════════════════════════╝</span></div>
+      <div class="tl"><span class="t-out">  Generado: 2026-05-01 | Items: 4</span></div>
+    </div>
+  </div>
+
+  <!-- [E] Snippet -->
+  <div class="snippet-wrap">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r" title="Cerrar"></span><span class="dot y" title="Minimizar"></span><span class="dot g" title="Maximizar"></span></div>
+      <div class="terminal-title">INSPECCIÓN DE CÓDIGO FUENTE</div>
+    </div>
+    <div class="snippet-toolbar">
+      <div class="snippet-tabs">
+        <span class="snippet-tab active">reporte.py</span>
+        <span class="snippet-tab">terminal</span>
+        <span class="snippet-tab">README</span>
+      </div>
+      <div class="snippet-header">
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="copy-btn run-btn" onclick="runSimulation(this)">▶ EJECUTAR</button>
+          <button class="copy-btn" onclick="copyCode(this, 'code3')">📋 COPIAR CÓDIGO</button>
+        </div>
+      </div>
+    </div>
+    <div class="snippet-body">
+      <!-- ESTRUCTURA REESCRITA PARA USAR EL MISMO CSS INQUEBRANTABLE DEL MÓDULO 1 Y 2 -->
+      <div class="code-lines" id="code3">
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ═══════════════════════════════════════════════════════</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># MOD_03 | F-Strings y Reportes Profesionales</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># Python 3.11+ — Formateo avanzado y generador de tickets</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ═══════════════════════════════════════════════════════</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">from</span> <span class="cls">datetime</span> <span class="kw">import</span> <span class="var">datetime</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="cmt"># ── Datos del ticket ──────────────────────────────────</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">productos</span>: <span class="bi">list</span>[<span class="bi">dict</span>] <span class="op">=</span> [</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    {<span class="str">"nombre"</span>: <span class="str">"Manzanas"</span>,     <span class="str">"cantidad"</span>: <span class="num">3</span>, <span class="str">"precio"</span>: <span class="num">1.50</span>},</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    {<span class="str">"nombre"</span>: <span class="str">"Pan integral"</span>,  <span class="str">"cantidad"</span>: <span class="num">1</span>, <span class="str">"precio"</span>: <span class="num">2.99</span>},</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    {<span class="str">"nombre"</span>: <span class="str">"Leche 1L"</span>,      <span class="str">"cantidad"</span>: <span class="num">2</span>, <span class="str">"precio"</span>: <span class="num">1.20</span>},</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    {<span class="str">"nombre"</span>: <span class="str">"Jugo naranja"</span>,  <span class="str">"cantidad"</span>: <span class="num">4</span>, <span class="str">"precio"</span>: <span class="num">0.99</span>},</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">]</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">ANCHO</span>  <span class="op">=</span> <span class="num">44</span>         <span class="cmt"># ancho total del ticket</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">IVA</span>    <span class="op">=</span> <span class="num">0.19</span>        <span class="cmt"># 19%</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="var">NUM</span>    <span class="op">=</span> <span class="num">42</span>           <span class="cmt"># número de ticket</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">def</span> <span class="fn">linea</span>(<span class="var">inicio</span><span class="op">=</span><span class="str">"╠"</span>, <span class="var">medio</span><span class="op">=</span><span class="str">"═"</span>, <span class="var">fin</span><span class="op">=</span><span class="str">"╣"</span>) <span class="op">-&gt;</span> <span class="bi">str</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="str">"""Genera una línea separadora de ancho fijo."""</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">return</span> <span class="str">f"{inicio}{medio * (ANCHO - 2)}{fin}"</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">def</span> <span class="fn">fila</span>(<span class="var">nombre</span>: <span class="bi">str</span>, <span class="var">cant</span>: <span class="bi">int</span>, <span class="var">precio</span>: <span class="bi">float</span>) <span class="op">-&gt;</span> <span class="bi">str</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="str">"""Genera una fila perfectamente tabulada con f-strings."""</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="cmt"># Total: 3 + 20 + 5 + 5 + 7 + 4 = 44 chars exactos</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">return</span> <span class="str">f"║  {nombre:&lt;20}{cant:&gt;5}    ${precio:&gt;7.2f}   ║"</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">def</span> <span class="fn">titulo</span>(<span class="var">texto</span>: <span class="bi">str</span>) <span class="op">-&gt;</span> <span class="bi">str</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="str">"""Centra el texto en el ancho del ticket."""</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="var">interior</span> <span class="op">=</span> <span class="str">f"{texto:^{ANCHO - 2}}"</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">return</span> <span class="str">f"║{interior}║"</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">def</span> <span class="fn">fila_total</span>(<span class="var">etiqueta</span>: <span class="bi">str</span>, <span class="var">monto</span>: <span class="bi">float</span>) <span class="op">-&gt;</span> <span class="bi">str</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="str">"""Fila de totales con etiqueta y monto alineados."""</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="cmt"># Total: 3 + 28 + 1 + 8 + 4 = 44 chars exactos (Corregido)</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">return</span> <span class="str">f"║  {etiqueta:&lt;28}${monto:&gt;8.2f}   ║"</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">def</span> <span class="fn">generar_ticket</span>(<span class="var">items</span>: <span class="bi">list</span>[<span class="bi">dict</span>], <span class="var">numero</span>: <span class="bi">int</span>):</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="str">"""Genera e imprime el ticket completo."""</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="var">fecha</span>    <span class="op">=</span> <span class="var">datetime</span>.<span class="fn">now</span>().<span class="fn">strftime</span>(<span class="str">"%Y-%m-%d"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="var">subtotal</span> <span class="op">=</span> <span class="fn">sum</span>(<span class="var">p</span>[<span class="str">"cantidad"</span>] <span class="op">*</span> <span class="var">p</span>[<span class="str">"precio"</span>] <span class="kw">for</span> <span class="var">p</span> <span class="kw">in</span> <span class="var">items</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="var">iva</span>      <span class="op">=</span> <span class="var">subtotal</span> <span class="op">*</span> <span class="var">IVA</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="var">total</span>    <span class="op">=</span> <span class="var">subtotal</span> <span class="op">+</span> <span class="var">iva</span></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="str">f"╔{'═'*(ANCHO-2)}╗"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">titulo</span>(<span class="str">f"TICKET DE VENTA  #{numero:0&gt;6}"</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">linea</span>())</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">titulo</span>(<span class="str">"Producto              Cant.    Precio"</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">linea</span>())</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="kw">for</span> <span class="var">p</span> <span class="kw">in</span> <span class="var">items</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">        <span class="bi">print</span>(<span class="fn">fila</span>(<span class="var">p</span>[<span class="str">"nombre"</span>], <span class="var">p</span>[<span class="str">"cantidad"</span>], <span class="var">p</span>[<span class="str">"precio"</span>]))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">linea</span>())</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">fila_total</span>(<span class="str">"SUBTOTAL:"</span>, <span class="var">subtotal</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">fila_total</span>(<span class="str">f"IVA ({IVA*100:.0f}%):"</span>, <span class="var">iva</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">linea</span>())</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="fn">fila_total</span>(<span class="str">"TOTAL:"</span>, <span class="var">total</span>))</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="str">f"╚{'═'*(ANCHO-2)}╝"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="bi">print</span>(<span class="str">f"  Generado: {fecha} | Items: {len(items):,}"</span>)</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"></div></div>
+<div class="line"><div class="line-num"></div><div class="line-code"><span class="kw">if</span> <span class="var">__name__</span> <span class="op">==</span> <span class="str">"__main__"</span>:</div></div>
+<div class="line"><div class="line-num"></div><div class="line-code">    <span class="fn">generar_ticket</span>(<span class="var">productos</span>, <span class="var">NUM</span>)</div></div>
+      </div>
+
+</section>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     BOTÓN VOLVER ARRIBA
+═══════════════════════════════════════════ -->
+<button id="back-to-top" title="Volver arriba">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer>
+  <div class="ascii">Python Advanced CLI</div>
+  <div>© 2026 &nbsp;|&nbsp; Recurso educativo de Python CLI &nbsp;|&nbsp; Andrew Farías</div>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT — COPIAR CÓDIGO UNIFICADO
+═══════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════
+// BOOT SEQUENCE (HACKER EXTREMO / MR. ROBOT)
+// ═══════════════════════════════════════════
+
+// Evitar que el navegador restaure la posición de scroll al recargar
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
+// --- SINTETIZADOR DE AUDIO GLOBAL ---
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTypeSound() {
+  try {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'sine'; // Onda senoidal: más limpia y sin saturación
+    osc.frequency.setValueAtTime(600, audioCtx.currentTime); // Tono inicial más alto (clic)
+    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.015);
+    
+    gain.gain.setValueAtTime(0, audioCtx.currentTime); // Empieza en 0 para evitar el 'pop'
+    gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.002); // Ataque rapidísimo
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02); // Decaimiento suave
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.025);
+  } catch (e) {}
+}
+
+function playClickSound() {
+  try {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime); // Tono inicial más agudo (tick UI)
+    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.01);
+    
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.02);
+  } catch (e) {}
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.body.classList.add('booting');
+  
+  const startBtn = document.getElementById('start-btn');
+  const startOverlay = document.getElementById('start-overlay');
+  
+  // Sonido interactivo para botones, enlaces, pestañas y controles
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('button, a, .snippet-tab, .terminal-tab, .dot, .flow-box, .fstr-part');
+    if (target) {
+      playClickSound();
+    }
+  });
+
+  startBtn.addEventListener('click', async function() {
+    initAudio(); // Inicializamos el motor de audio en el primer clic
+    startOverlay.style.pointerEvents = 'none';
+    startOverlay.style.opacity = '0';
+    setTimeout(() => startOverlay.remove(), 300);
+
+    const bootText = document.getElementById('boot-text');
+    const bootScreen = document.getElementById('boot-screen');
+
+  // Utilidad mágica para pausar la ejecución exactamente los milisegundos que queramos
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // Función para escribir texto letra a letra con velocidad variable
+  async function typeLine(text, speed = 4, cssClass = "") {
+    const span = document.createElement('span');
+    if (cssClass) span.className = cssClass;
+    bootText.appendChild(span);
+
+    for (let i = 0; i < text.length; i++) {
+      span.innerHTML += text.charAt(i);
+      if (text.charAt(i) !== ' ') playTypeSound(); // Tocar sonido excepto en espacios
+      // Math.random() hace que la velocidad de tipeo sea irregular (más humano/realista)
+      await sleep(speed + Math.random() * 10);
+    }
+    bootText.appendChild(document.createElement('br'));
+  }
+
+  // FASE 1: VOLCADO DE MEMORIA (Basura hexadecimal a toda velocidad)
+  async function memoryDump() {
+     for(let i=0; i<18; i++) {
+        // Genera direcciones de memoria falsas ej. [0x4F8A2C]
+        let line = `[0x${Math.floor(Math.random()*16777215).toString(16).toUpperCase().padStart(6,'0')}] `;
+        // Genera bloques de códigos aleatorios
+        for(let j=0; j<8; j++) line += Math.random().toString(36).substring(2, 6).toUpperCase() + " ";
+        
+        const span = document.createElement('span');
+        span.style.opacity = "0.4"; // Se ve oscuro como texto de fondo
+        span.innerHTML = line;
+        bootText.appendChild(span);
+        bootText.appendChild(document.createElement('br'));
+        playTypeSound();
+        await sleep(5); // Cae rapidísimo
+     }
+  }
+
+  // === AQUÍ EMPIEZA LA PELÍCULA ===
+  await sleep(150);
+  await memoryDump();
+  await sleep(150);
+  
+  // Limpiar pantalla después del volcado de basura
+  bootText.innerHTML = "";
+  
+  // FASE 2: INTRUSIÓN (Comandos tácticos)
+  await typeLine("INICIALIZANDO KERNEL CIBERNÉTICO...", 2);
+  await typeLine("ENCRIPTACIÓN RSA-4096 DETECTADA.", 2);
+  await sleep(100);
+  await typeLine("[⚠] ALERTA FATAL: INTENTO DE CONEXIÓN NO AUTORIZADO DETECTADO", 2, "boot-red");
+  await typeLine("EJECUTANDO BRUTE-FORCE OVERRIDE...", 6);
+  await typeLine("ENRUTANDO IP: 192.168.1.45 -> 10.4.3.2 -> 8.8.8.8 -> [OCULTO]", 1);
+  await sleep(150);
+
+  // FASE 3: BARRA DE PROGRESO ANIMADA
+  const progressLabel = document.createElement('span');
+  progressLabel.innerHTML = "CRACKEANDO HASH DE ADMIN: ";
+  bootText.appendChild(progressLabel);
+
+  const progressSpan = document.createElement('span');
+  progressSpan.className = "boot-yellow";
+  bootText.appendChild(progressSpan);
+  
+  for(let i=1; i<=20; i++) {
+    let bar = "█".repeat(i) + "░".repeat(20-i);
+    progressSpan.innerHTML = `[${bar}] ${i*5}%`;
+    playTypeSound();
+    await sleep(15); // Velocidad a la que se llena la barra
+  }
+  bootText.appendChild(document.createElement('br'));
+
+  await sleep(100);
+  await typeLine("OVERRIDE EXITOSO. FIREWALL DEL SISTEMA DESACTIVADO.", 5, "boot-cyan");
+  await sleep(200);
+
+  // FASE 4: ACCESO CONCEDIDO (Flashing Invertido)
+  bootText.appendChild(document.createElement('br'));
+  const granted = document.createElement('span');
+  granted.className = "boot-granted";
+  granted.innerText = "[ ACCESO AL SISTEMA CONCEDIDO ]";
+  bootText.appendChild(granted);
+
+  // Pausa dramática para que sientas la adrenalina del hackeo exitoso
+  await sleep(800); 
+
+  // FASE 5: APERTURA DEL SISTEMA (Fade out)
+  bootScreen.classList.add('hidden');
+  document.body.classList.remove('booting');
+  setTimeout(() => bootScreen.remove(), 800); // Destruye el nodo para limpiar memoria
+  }); // Fin del event listener del botón
+});
+// La numeración ahora se maneja 100% por CSS nativo (CSS Counters).
+// Ya no necesitamos la función buildLineNums propensa a errores.
+
+// Función unificada de copiar código al portapapeles
+function copyCode(btn, codeId) {
+  const container = document.getElementById(codeId);
+  const lines = container.querySelectorAll('.line-code');
+  
+  // Extrae el texto saltando los números de línea, asegurando copiado limpio
+  const text = Array.from(lines).map(l => l.innerText).join('\n');
+
+  navigator.clipboard.writeText(text).then(() => {
+    showCopiedState(btn);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopiedState(btn);
+  });
+}
+
+function showCopiedState(btn) {
+  btn.textContent = '✅ COPIADO';
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.textContent = '📋 COPIAR CÓDIGO';
+    btn.classList.remove('copied');
+  }, 4000);
+}
+
+// Ejecutar la simulación para el snippet interactivo
+function runSimulation(btn) {
+  const container = btn.closest('.snippet-wrap');
+  if (!container) return;
+  
+  // Forzar que el scroll se alinee perfectamente al centro de la pantalla
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Cambiar automáticamente a la pestaña de la terminal
+  const tabs = container.querySelectorAll('.snippet-tab');
+  const terminalTab = Array.from(tabs).find(t => t.textContent.trim().toLowerCase() === 'terminal');
+  if (terminalTab) terminalTab.click();
+  
+  // Reiniciar la animación de las líneas de la terminal con "carga"
+  const termLines = container.querySelectorAll('.snippet-panel[data-panel="tab-2"] .tl');
+  if (termLines.length === 0) return;
+
+  const firstLine = termLines[0];
+
+  // Ocultar todas las líneas excepto la primera
+  termLines.forEach((line, index) => {
+    if (index > 0) line.style.display = 'none';
+    line.style.animationName = 'none';
+  });
+
+  // Asegurar que la primera línea sea visible de inmediato
+  firstLine.style.opacity = '1';
+  firstLine.style.transform = 'translateY(0)';
+
+  // Añadir spinner de carga
+  let loader = firstLine.querySelector('.term-loader');
+  if (!loader) {
+    loader = document.createElement('span');
+    loader.className = 'term-loader';
+    firstLine.appendChild(loader);
+  }
+
+  // Después de 1.2 segundos, quitamos el loader y animamos el resto
+  setTimeout(() => {
+    if (loader) loader.remove();
+    termLines.forEach((line, index) => {
+      if (index > 0) {
+        line.style.display = '';
+        void line.offsetWidth; // Forzar reflow
+        line.style.animationName = ''; // Restaurar animación CSS normal
+      }
+    });
+  }, 1200);
+}
+
+function setupInteractiveTabs() {
+  function findLinkedTerminal(container) {
+    let sibling = container.previousElementSibling;
+    while (sibling) {
+      if (sibling.classList.contains('terminal-window')) return sibling;
+      sibling = sibling.previousElementSibling;
+    }
+    return null;
+  }
+
+  function createSnippetPanels(container) {
+    const body = container.querySelector('.snippet-body');
+    if (!body) return;
+
+    const firstPanel = document.createElement('div');
+    firstPanel.className = 'snippet-panel snippet-panel--active active';
+    firstPanel.dataset.panel = 'tab-1';
+    while (body.firstChild) {
+      firstPanel.appendChild(body.firstChild);
+    }
+    body.appendChild(firstPanel);
+
+    const terminalPanel = document.createElement('div');
+    terminalPanel.className = 'snippet-panel';
+    terminalPanel.dataset.panel = 'tab-2';
+
+    const terminalWindow = findLinkedTerminal(container);
+    if (terminalWindow) {
+      const terminalBody = terminalWindow.querySelector('.terminal-body');
+      if (terminalBody) {
+        terminalPanel.appendChild(terminalBody.cloneNode(true));
+      } else {
+        terminalPanel.innerHTML = '<div class="terminal-placeholder">Salida de terminal simulada disponible aquí.</div>';
+      }
+      const terminalLabel = terminalWindow.previousElementSibling;
+      if (terminalLabel && terminalLabel.classList.contains('section-label')) {
+        terminalLabel.remove();
+      }
+      terminalWindow.remove();
+    } else {
+      terminalPanel.innerHTML = '<div class="terminal-placeholder">Salida de terminal simulada disponible aquí.</div>';
+    }
+    body.appendChild(terminalPanel);
+
+    const moduleName = container.querySelector('.snippet-tab')?.textContent?.trim().toLowerCase();
+
+    const notePanel = document.createElement('div');
+    notePanel.className = 'snippet-panel';
+    notePanel.dataset.panel = 'tab-3';
+
+    let noteHtml = '';
+    if (moduleName === 'bubble_sort.py') {
+      noteHtml = `
+<div class="snippet-note">
+  <strong>¿Por qué funciona?</strong>
+  <br>Este algoritmo recorre la lista mediante bucles anidados. Compara pares consecutivos (<code>v1</code> y <code>v2</code>) y los intercambia si el primero es mayor que el segundo.
+  <br>La variable <code>intercambiado</code> funciona como un optimizador (flag): si en una pasada no se realiza ningún intercambio, significa que la lista ya está ordenada y se rompe el ciclo para ahorrar tiempo de ejecución.
+  <br><strong>Consejos:</strong>
+  <br>- Este ejercicio es excelente para entender la lógica de control de flujo y el manejo de índices en arreglos.
+  <br>- Sin embargo, Bubble Sort no es eficiente para listas grandes. En aplicaciones reales, prefiere siempre los métodos nativos <code>.sort()</code> (in-place) o <code>sorted()</code> (crea una nueva lista), ya que utilizan un algoritmo altamente optimizado (Timsort).
+</div>`;
+    } else if (moduleName === 'gestor_errores.py') {
+      noteHtml = `
+<div class="snippet-note">
+  <strong>¿Por qué funciona?</strong>
+  <br>El bloque <code>try</code> captura la entrada del usuario y convierte el texto a entero. Si falla, un <code>except</code> muestra un mensaje sin romper el programa.
+  <br>Hay dos excepciones claras: <code>ValueError</code> para datos no numéricos y <code>ZeroDivisionError</code> para divisiones por cero.
+  <br>El bloque <code>finally</code> se ejecuta siempre, lo que es ideal para limpiar recursos o avisar que terminó el ciclo.
+  <br><strong>Consejos:</strong>
+  <br>- Siempre valida la entrada antes de usarla.
+  <br>- Usa mensajes específicos para que el usuario sepa qué corregir.
+  <br>- Para programas reales, considera bucles que vuelvan a pedir el dato hasta que sea válido.
+</div>`;
+    } else if (moduleName === 'reporte.py') {
+      noteHtml = `
+<div class="snippet-note">
+  <strong>¿Por qué funciona?</strong>
+  <br>Este código construye un ticket fijo porque todas las líneas tienen el mismo ancho definido por <code>ANCHO</code>.
+  <br>Las funciones <code>linea()</code>, <code>fila()</code> y <code>fila_total()</code> formatean cada línea con <code>f-strings</code> para alinear texto y números.
+  <br>El valor de <code>IVA</code> y el subtotal se calculan antes de imprimir, evitando inconsistencias en la salida.
+  <br><strong>Consejos:</strong>
+  <br>- Usa f-strings con ancho fijo (<code>{valor:>7.2f}</code>) para columnas claras.
+  <br>- Mantén los datos del ticket en estructuras simples como listas de diccionarios.
+  <br>- Separa la lógica de cálculo de la presentación para que el formato sea fácil de ajustar.
+</div>`;
+    } else {
+      noteHtml = `
+<div class="snippet-note">
+  <strong>README</strong>
+  <br>Este panel explica por qué funciona el código y ofrece consejos prácticos para mejorar su lectura y mantenimiento.
+  <br>Incluye una breve descripción, los puntos clave de diseño y recomendaciones para producción.
+</div>`;
+    }
+
+    notePanel.innerHTML = noteHtml;
+    body.appendChild(notePanel);
+  }
+
+  document.querySelectorAll('.snippet-tabs').forEach(tabWrapper => {
+    Array.from(tabWrapper.children).forEach((tab, index) => {
+      tab.dataset.tab = `tab-${index + 1}`;
+      tab.classList.toggle('active', index === 0);
+    });
+
+    const container = tabWrapper.closest('.snippet-wrap');
+    if (!container) return;
+    createSnippetPanels(container);
+
+    tabWrapper.addEventListener('click', (event) => {
+      const tab = event.target.closest('.snippet-tab');
+      if (!tab) return;
+      const panelKey = tab.dataset.tab;
+
+      const tabs = container.querySelectorAll('.snippet-tab');
+      const panels = container.querySelectorAll('.snippet-panel');
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      panels.forEach(panel => panel.classList.toggle('active', panel.dataset.panel === panelKey));
+
+      // Mostrar los botones de copiar/ejecutar SOLO en la pestaña de código (tab-1)
+      const header = container.querySelector('.snippet-header');
+      if (header) {
+        header.style.display = panelKey === 'tab-1' ? 'flex' : 'none';
+      }
+
+      // Si el usuario sale del código, centramos la vista para evitar el salto por el cambio de tamaño
+      if (panelKey !== 'tab-1') {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// EFECTOS DE SCROLL (SIN BUGS DE PARPADEO)
+// ═══════════════════════════════════════════
+
+// --- AUTO-HIDE NAVBAR Y VOLVER ARRIBA ---
+let lastScrollTop = 0;
+const navbar = document.querySelector('nav');
+const backToTopBtn = document.getElementById('back-to-top');
+
+if (backToTopBtn) {
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+window.addEventListener('scroll', () => {
+  let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  
+  if (scrollTop > lastScrollTop && scrollTop > 60) {
+    navbar.classList.add('nav-hidden'); // Ocultar al bajar
+  } else if (scrollTop < lastScrollTop) {
+    navbar.classList.remove('nav-hidden'); // Mostrar al subir
+  }
+  lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+
+  // Botón volver arriba
+  if (backToTopBtn) {
+    if (scrollTop > 300) {
+      backToTopBtn.classList.add('show');
+    } else {
+      backToTopBtn.classList.remove('show');
+    }
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.10 // Ligeramente reducido para una entrada más fluida
+  };
+
+  setupInteractiveTabs();
+
+  // --- EFECTO GLOW AL HACER CLIC EN CAJAS DE CÓDIGO ---
+  document.addEventListener('mousedown', (e) => {
+    const boxes = document.querySelectorAll('.snippet-wrap, .terminal-window, .flowchart, .fstring-anatomy');
+    boxes.forEach(box => {
+      if (box.contains(e.target)) {
+        box.classList.add('box-glow');
+      } else {
+        box.classList.remove('box-glow');
+      }
+    });
+  });
+
+  // --- RESALTADO DE SINTAXIS (Corchetes, Llaves, Paréntesis) ---
+  function highlightBrackets() {
+    const elements = document.querySelectorAll('pre, .line-code');
+    elements.forEach(el => {
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+      const nodesToReplace = [];
+      let node;
+      while (node = walker.nextNode()) {
+        const parentClass = node.parentElement.className || '';
+        // Evitar alterar comentarios o cadenas de texto estáticas
+        if (parentClass.includes('cmt') || parentClass.includes('str')) continue;
+        if (/[\(\)\[\]\{\}]/.test(node.nodeValue)) nodesToReplace.push(node);
+      }
+      nodesToReplace.forEach(node => {
+        const frag = document.createDocumentFragment();
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = node.nodeValue
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/([\(\)\[\]\{\}])/g, m => {
+            if (m === '(' || m === ')') return `<span class="prn">${m}</span>`;
+            if (m === '[' || m === ']') return `<span class="brk">${m}</span>`;
+            return `<span class="brc">${m}</span>`;
+          });
+        while(tempDiv.firstChild) frag.appendChild(tempDiv.firstChild);
+        node.parentNode.replaceChild(frag, node);
+      });
+    });
+  }
+  highlightBrackets();
+  // -------------------------------------------------------------
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      // entry.target ahora es nuestro "guardia invisible" (el wrapper).
+      // Buscamos el elemento real animado que está adentro.
+      const realElement = entry.target.firstElementChild;
+      
+      if (!realElement) return;
+
+      if (entry.isIntersecting) {
+        // La caja invisible entró en pantalla: activamos el bloque real
+        realElement.classList.add('active');
+      } else {
+        // La caja invisible salió de pantalla: lo apagamos
+        realElement.classList.remove('active');
+      }
+    });
+  }, observerOptions);
+
+  const elementsToAnimate = document.querySelectorAll('.module-header, .compare-grid, .flowchart, .snippet-wrap, .fstring-anatomy');
+  
+  elementsToAnimate.forEach((el) => {
+    // 🛠 SOLUCIÓN AL BUG: Creamos un "wrapper" estático en el HTML con JavaScript
+    const wrapper = document.createElement('div');
+    // Insertamos el wrapper justo antes del elemento
+    el.parentNode.insertBefore(wrapper, el);
+    // Metemos el elemento dentro del wrapper
+    wrapper.appendChild(el);
+    
+    el.classList.add('reveal');
+    
+    // Le decimos a JS que vigile la caja que NO se mueve, no el elemento que salta
+    observer.observe(wrapper); 
+  });
+
+  // Retraso de tipeo para las líneas de código (Se mantiene igual)
+  document.querySelectorAll('.code-lines').forEach(codeBlock => {
+    const lines = codeBlock.querySelectorAll('.line');
+    lines.forEach((line, index) => {
+      line.style.animationDelay = `${0.3 + (index * 0.03)}s`;
+    });
+  });
+
+  // Animación dinámica para las líneas de terminal sin importar la cantidad
+  document.querySelectorAll('.terminal-body').forEach(terminalBody => {
+    const lines = terminalBody.querySelectorAll('.tl');
+    lines.forEach((line, index) => {
+      line.style.animationDelay = `${0.1 + (index * 0.1)}s`;
+    });
+  });
+
+  // Animación dinámica para el diagrama de flujo (elemento por elemento)
+  document.querySelectorAll('.flowchart').forEach(flowchart => {
+    const elements = flowchart.querySelectorAll('.flow-box, .flow-arrow, .flow-label');
+    elements.forEach((el, index) => {
+      el.style.transitionDelay = `${0.15 + (index * 0.05)}s`;
+    });
+  });
+
+  // Animación dinámica para las filas de la tabla
+  document.querySelectorAll('.fstr-table').forEach(table => {
+    const rows = table.querySelectorAll('tr');
+    rows.forEach((row, index) => {
+      row.style.transitionDelay = `${0.3 + (index * 0.1)}s`;
+    });
+  });
+});
+</script>
+
+</body>
+</html>
