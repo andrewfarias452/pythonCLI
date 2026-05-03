@@ -210,6 +210,12 @@ function runSimulation(btn) {
   const container = btn.closest('.snippet-wrap');
   if (!container) return;
   
+  // Cambiar el estado del botón a "Procesando"
+  const originalText = btn.textContent;
+  btn.innerHTML = '<span class="term-loader" style="margin: 0 8px 0 0; color: inherit;"></span>PROCESANDO';
+  btn.classList.add('running');
+  btn.style.pointerEvents = 'none'; // Desactivar clics dobles
+
   // Forzar que el scroll se alinee perfectamente al centro de la pantalla
   container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -252,6 +258,11 @@ function runSimulation(btn) {
         line.style.animationName = ''; // Restaurar animación CSS normal
       }
     });
+
+    // Restaurar el botón original
+    btn.textContent = originalText;
+    btn.classList.remove('running');
+    btn.style.pointerEvents = 'auto';
   }, 1200);
 }
 

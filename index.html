@@ -225,6 +225,14 @@ nav.nav-hidden {
   animation: none;
 }
 
+.hero-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
 /* Título ASCII */
 .hero-ascii {
   color: var(--blue);
@@ -332,6 +340,48 @@ main {
 
 .module-def strong { color: var(--text); }
 
+/* Tarjetas de conceptos interactivos */
+.concept-card {
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.concept-card.c-green {
+  background: rgba(0, 255, 102, 0.03);
+  border: 1px solid rgba(0, 255, 102, 0.15);
+  box-shadow: inset 0 0 20px rgba(0,255,102,0.02);
+}
+.concept-card.c-green:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0, 255, 102, 0.4);
+  box-shadow: inset 0 0 20px rgba(0,255,102,0.05), 0 10px 25px rgba(0, 255, 102, 0.15);
+}
+
+.concept-card.c-blue {
+  background: rgba(0, 191, 255, 0.03);
+  border: 1px solid rgba(0, 191, 255, 0.15);
+  box-shadow: inset 0 0 20px rgba(0,191,255,0.02);
+}
+.concept-card.c-blue:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0, 191, 255, 0.4);
+  box-shadow: inset 0 0 20px rgba(0,191,255,0.05), 0 10px 25px rgba(0, 191, 255, 0.15);
+}
+
+.concept-card.c-red {
+  background: rgba(255, 77, 77, 0.03);
+  border: 1px solid rgba(255, 77, 77, 0.15);
+  box-shadow: inset 0 0 20px rgba(255,77,77,0.02);
+}
+.concept-card.c-red:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 77, 77, 0.4);
+  box-shadow: inset 0 0 20px rgba(255,77,77,0.05), 0 10px 25px rgba(255, 77, 77, 0.15);
+}
+
 /* [B] Antes vs Después */
 .section-label {
   font-size: 12px;
@@ -368,6 +418,9 @@ main {
   padding: 1.5rem;
   position: relative;
   transition: background 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .compare-col.bad {
@@ -412,12 +465,50 @@ main {
   text-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
 }
 
+/* Ventanas de código en comparativas */
+.compare-window {
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.2);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.compare-window .terminal-bar {
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 8px 14px;
+  flex-shrink: 0;
+}
+
+.compare-window pre {
+  padding: 1.2rem;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.compare-col.bad:hover .compare-window {
+  border-color: rgba(255, 77, 77, 0.3);
+  box-shadow: inset 0 0 20px rgba(255, 77, 77, 0.1), 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.compare-col.good:hover .compare-window {
+  border-color: rgba(0, 255, 102, 0.3);
+  box-shadow: inset 0 0 20px rgba(0, 255, 102, 0.1), 0 8px 20px rgba(0,0,0,0.2);
+}
+
 @media (max-width: 768px) {
   .module { padding: 3rem 1.5rem; margin-bottom: 3rem; }
   .compare-grid { grid-template-columns: 1fr; }
   .compare-col.bad { border-right: none; border-bottom: 1px dashed rgba(255,255,255,0.05); }
   nav { padding: 0 1rem; }
   .nav-logo .ascii-extra { display: none; }
+  .hero-panels { grid-template-columns: 1fr; gap: 1.5rem; }
 }
 
 /* Los colores se controlarán desde el HTML con spans */
@@ -1217,37 +1308,57 @@ a, button, .copy-btn, .nav-links a {
      HERO
 ═══════════════════════════════════════════ -->
 <section class="hero">
-  <div class="hero-console">
+  <div class="hero-console terminal-window" style="box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 0 60px rgba(0,255,140,0.05); border: 1px solid rgba(156,255,159,0.3);">
+    <div class="terminal-bar">
+      <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <div class="terminal-title">SYS_INIT // KERNEL_BOOT</div>
+    </div>
+    <div class="terminal-body" style="padding: 2rem;">
       <div class="tl"><span class="t-prompt">&gt;</span> <span class="t-cmd">INICIANDO SISTEMA...</span></div>
       <div class="tl"><span class="t-out">Cargando dependencias de aprendizaje...</span></div>
       <div class="tl"><span class="t-ok">[ OK ] Sistema listo.</span></div>
-      <div class="tl"><span class="t-out"> </span></div>
-      <div class="tl">
-        <div class="hero-ascii"> ____        _   _                   ____ _     ___ 
+      
+      <div class="hero-center" style="text-align: center; margin: 3rem 0;">
+        <div class="hero-ascii" style="display: inline-block; text-align: left;"> ____        _   _                   ____ _     ___ 
 |  _ \ _   _| |_| |__   ___  _ __   / ___| |   |_ _|
 | |_) | | | | __| '_ \ / _ \| '_ \ | |   | |    | | 
 |  __/| |_| | |_| | | | (_) | | | || |___| |___ | | 
 |_|    \__, |\__|_| |_|\___/|_| |_| \____|_____|___|
        |___/                                        </div>
+        <div class="t-cmd" style="letter-spacing: 0.3em; margin-top: 1.5rem; font-weight: 700; color: var(--text); text-shadow: 0 0 10px rgba(255,255,255,0.2);">=== CONCEPTOS AVANZADOS ===</div>
       </div>
-      <div class="tl"><span class="t-out">  === CONCEPTOS AVANZADOS ===</span></div>
-      <div class="tl"><span class="t-out"> </span></div>
-      <div class="tl"><span class="t-out">  [DESCRIPCIÓN]</span></div>
-      <div class="tl"><span class="t-out">  Profundiza en algoritmia, gestión de excepciones y formateo</span></div>
-      <div class="tl"><span class="t-out">  profesional de datos aplicados a programas de terminal.</span></div>
-      <div class="tl"><span class="t-out">  Aprende a escribir código robusto, eficiente y bien presentado.</span></div>
-      <div class="tl"><span class="t-out"> </span></div>
-      <div class="tl"><span class="t-out">  [ESTADO DEL SISTEMA]</span></div>
-      <div class="tl"><span class="t-out">  > Módulos cargados  : <span class="t-warn">3</span></span></div>
-      <div class="tl"><span class="t-out">  > Secciones activas : <span class="t-warn">9</span></span></div>
-      <div class="tl"><span class="t-out">  > Enfoque principal : <span class="t-warn">Terminal First</span></span></div>
-      <div class="tl"><span class="t-out"> </span></div>
-      <div class="tl">
+
+      <div class="hero-panels">
+        <div class="hero-panel" style="background: rgba(0, 255, 102, 0.03); border: 1px solid rgba(0, 255, 102, 0.15); padding: 1.5rem; border-radius: var(--radius); box-shadow: inset 0 0 20px rgba(0,255,102,0.02);">
+          <div class="t-prompt" style="margin-bottom: 1rem; font-size: 12px; letter-spacing: 0.1em; text-shadow: 0 0 8px rgba(0,255,102,0.4);">[ DESCRIPCIÓN ]</div>
+          <div class="t-out" style="line-height: 1.8; font-size: 13px;">
+            Profundiza en algoritmia, gestión de excepciones y formateo profesional de datos aplicados a programas de terminal. Aprende a escribir código robusto, eficiente y bien presentado.
+          </div>
+        </div>
+        
+        <div class="hero-panel" style="background: rgba(0, 191, 255, 0.03); border: 1px solid rgba(0, 191, 255, 0.15); padding: 1.5rem; border-radius: var(--radius); box-shadow: inset 0 0 20px rgba(0,191,255,0.02);">
+          <div class="t-prompt" style="color: var(--blue); margin-bottom: 1rem; font-size: 12px; letter-spacing: 0.1em; text-shadow: 0 0 8px rgba(0,191,255,0.4);">[ ESTADO DEL SISTEMA ]</div>
+          <div class="t-out" style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+              <span>&gt; Módulos cargados</span> <span class="t-warn" style="font-weight:700;">3</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+              <span>&gt; Secciones activas</span> <span class="t-warn" style="font-weight:700;">9</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+              <span>&gt; Enfoque principal</span> <span class="t-warn" style="font-weight:700;">Terminal First</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl" style="border-top: 1px dashed rgba(156,255,159,0.2); padding-top: 1.5rem; margin-bottom: 0;">
         <div class="typing-line">
           <span class="typing-prompt">&gt;</span>
           <span class="typing-text">Cargando entorno interactivo...</span>
         </div>
       </div>
+    </div>
   </div>
 </section>
 
@@ -1262,10 +1373,41 @@ a, button, .copy-btn, .nav-links a {
   <div class="module-header">
     <div class="module-num"><span class="t-prompt">&gt;</span> MÓDULO 01</div>
     <h2 class="module-title"><span class="accent">Algoritmia</span> y Ordenamiento</h2>
-    <div class="module-def">
-      Un <strong>algoritmo de ordenamiento</strong> organiza datos, pero en Python, la elección entre <strong>.sort()</strong> y <strong>sorted()</strong> define cómo interactúa tu programa con la memoria (RAM) y la estructura de los datos.
-      <br><br>
-      <strong>¿Porqué?</strong> <code><strong>.sort()</strong></code> es un método <em>exclusivo de las listas</em>. Trabaja <strong>in-place</strong>, es decir, reescribe los bloques de memoria originales destruyendo el orden anterior y retorna <code>None</code>. Al no clonar información, es la vía más rápida y eficiente para procesar bases de datos masivas. En contraste, <code><strong>sorted()</strong></code> es una función universal que acepta <em>cualquier iterable</em> (incluso tuplas o diccionarios, que no tienen <code>.sort</code> propio). Para funcionar, el procesador asigna nueva memoria, crea una lista nueva desde cero, la ordena y te la entrega. Protege tu información original de mutaciones (ideal para programación funcional), pero exige más RAM temporal. Bajo el capó, ambos usan <em>Timsort</em>, un motor híbrido ultrarrápido.
+    <div class="module-def" style="background: transparent; border: none; padding: 0;">
+      <div style="border-left: 3px solid var(--green); padding: 1rem 1.5rem; background: rgba(10, 20, 14, 0.85); border-radius: 0 var(--radius) var(--radius) 0; margin-bottom: 1.5rem;">
+        Un <strong>algoritmo de ordenamiento</strong> organiza datos, pero en Python, la elección entre <strong style="color:var(--green); font-family: var(--font);">.sort()</strong> y <strong style="color:var(--blue); font-family: var(--font);">sorted()</strong> define cómo interactúa tu programa con la memoria (RAM) y la estructura de los datos.
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="concept-card c-green">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(0, 255, 102, 0.1); color: var(--green); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">IN-PLACE</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--green); margin-bottom: 0.5rem; font-family: var(--font);">.sort()</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(0, 255, 102, 0.2); padding-bottom: 0.5rem;">MÉTODO EXCLUSIVO DE LISTAS</div>
+          <p style="font-size: 13px; margin-bottom: 1rem;"><strong style="color: var(--green);">Reescribe los bloques de memoria originales</strong> destruyendo el orden anterior y retorna <code style="color:var(--magenta);">None</code>.</p>
+          <ul style="list-style: none; font-size: 12px; display: flex; flex-direction: column; gap: 0.4rem;">
+            <li><span style="color: var(--green); margin-right: 6px;">✓</span> Vía más rápida y eficiente</li>
+            <li><span style="color: var(--green); margin-right: 6px;">✓</span> Ideal para procesar BD masivas</li>
+            <li><span style="color: var(--red); margin-right: 6px;">✗</span> No clona información (destructivo)</li>
+          </ul>
+        </div>
+        
+        <div class="concept-card c-blue">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(0, 191, 255, 0.1); color: var(--blue); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">NUEVA MEMORIA</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--blue); margin-bottom: 0.5rem; font-family: var(--font);">sorted()</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(0, 191, 255, 0.2); padding-bottom: 0.5rem;">FUNCIÓN UNIVERSAL (ITERABLES)</div>
+          <p style="font-size: 13px; margin-bottom: 1rem;"><strong style="color: var(--blue);">Asigna nueva memoria</strong>, crea una lista desde cero, la ordena y te la entrega. Acepta tuplas, diccionarios, etc.</p>
+          <ul style="list-style: none; font-size: 12px; display: flex; flex-direction: column; gap: 0.4rem;">
+            <li><span style="color: var(--blue); margin-right: 6px;">✓</span> Protege la información original</li>
+            <li><span style="color: var(--blue); margin-right: 6px;">✓</span> Ideal para programación funcional</li>
+            <li><span style="color: var(--red); margin-right: 6px;">✗</span> Exige más RAM temporal</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="background: rgba(255, 208, 0, 0.05); border-left: 3px solid var(--yellow); padding: 0.8rem 1.2rem; font-size: 12px; border-radius: 0 var(--radius) var(--radius) 0; display: flex; align-items: center; gap: 1rem;">
+        <span style="font-size: 20px;">⚡</span>
+        <div>Bajo el capó, ambos utilizan <strong style="color: var(--yellow);">Timsort</strong>, un motor de ordenamiento híbrido ultrarrápido derivado de Merge Sort e Insertion Sort.</div>
+      </div>
     </div>
   </div>
 
@@ -1274,6 +1416,11 @@ a, button, .copy-btn, .nav-links a {
   <div class="compare-grid">
     <div class="compare-col bad">
       <div class="compare-header"><span class="compare-icon">✗</span> CÓDIGO INEFICIENTE</div>
+      <div class="compare-window">
+        <div class="terminal-bar">
+          <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="terminal-title" style="opacity: 0.5;">burbuja.py</div>
+        </div>
 <pre><span class="cmt"># Ordenamiento manual — confuso y verboso</span>
 <span class="cmt"># No se sabe qué criterio usa, ni si</span>
 <span class="cmt"># modifica la lista o crea una nueva.</span>
@@ -1297,9 +1444,15 @@ a, button, .copy-btn, .nav-links a {
     <span class="kw">if</span> <span class="var">personas</span>[<span class="var">j</span>][<span class="num">1</span>] > <span class="var">personas</span>[<span class="var">i</span>][<span class="num">1</span>]:
       <span class="var">personas</span>[<span class="var">i</span>], <span class="var">personas</span>[<span class="var">j</span>] <span class="op">=</span> \
         <span class="var">personas</span>[<span class="var">j</span>], <span class="var">personas</span>[<span class="var">i</span>]</pre>
+      </div>
     </div>
     <div class="compare-col good">
       <div class="compare-header"><span class="compare-icon">✓</span> CÓDIGO OPTIMIZADO</div>
+      <div class="compare-window">
+        <div class="terminal-bar">
+          <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="terminal-title" style="opacity: 0.5;">sort_optimizado.py</div>
+        </div>
 <pre><span class="cmt"># .sort() — in-place: modifica la lista</span>
 <span class="cmt"># sorted() — retorna nueva lista sin tocar</span>
 <span class="cmt"># la original. Timsort O(n log n).</span>
@@ -1322,6 +1475,7 @@ a, button, .copy-btn, .nav-links a {
 )
 <span class="bi">print</span>(<span class="var">por_edad</span>)
 <span class="cmt"># [('Luis', 25), ('Ana', 30)]</span></pre>
+      </div>
     </div>
   </div>
 
@@ -1527,10 +1681,33 @@ a, button, .copy-btn, .nav-links a {
   <div class="module-header">
     <div class="module-num"><span class="t-prompt">&gt;</span> MÓDULO 02</div>
     <h2 class="module-title"><span class="accent">Gestión</span> de Excepciones</h2>
-    <div class="module-def">
-      Las excepciones no tratadas provocan el cierre forzoso de un programa. El bloque <strong>try/except/finally</strong> es el escudo protector que intercepta estos fallos antes de que destruyan la ejecución.
-      <br><br>
-      <strong>¿Porqué?</strong> Cada bloque tiene un rol vital en la memoria y el procesador. El <strong>try</strong> crea una "zona de pruebas"; monitorea el código y no penaliza el rendimiento si todo sale bien. El <strong>except</strong> es el interceptor: si algo falla, en lugar de que el programa colapse enviando un volcado de memoria (<em>traceback</em>) al Sistema Operativo, captura ese "objeto de error" específico (ej. <code>ValueError</code>) y desvía el flujo hacia una solución segura. Finalmente, el <strong>finally</strong> es la limpieza garantizada por el intérprete (CPython): sin importar si hubo un error fatal o un <code>return</code> prematuro, la computadora está forzada a ejecutar este bloque para quitar "candados" a los archivos y liberar memoria, evitando que la máquina se quede sin recursos.
+    <div class="module-def" style="background: transparent; border: none; padding: 0;">
+      <div style="border-left: 3px solid var(--green); padding: 1rem 1.5rem; background: rgba(10, 20, 14, 0.85); border-radius: 0 var(--radius) var(--radius) 0; margin-bottom: 1.5rem;">
+        Las excepciones no tratadas provocan el cierre forzoso de un programa. El bloque <strong style="color:var(--green); font-family: var(--font);">try / except / finally</strong> es el escudo protector que intercepta estos fallos antes de que destruyan la ejecución.
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+        <div class="concept-card c-green">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(0, 255, 102, 0.1); color: var(--green); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">MONITOR</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--green); margin-bottom: 0.5rem; font-family: var(--font);">try:</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(0, 255, 102, 0.2); padding-bottom: 0.5rem;">ZONA DE PRUEBAS</div>
+          <p style="font-size: 13px; margin-bottom: 0;"><strong style="color: var(--green);">Crea un entorno aislado</strong> para ejecutar el código. Evalúa las instrucciones de forma directa y <strong style="color: var(--green);">no penaliza el rendimiento</strong> del procesador si todo sale bien.</p>
+        </div>
+        
+        <div class="concept-card c-red">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(255, 77, 77, 0.1); color: var(--red); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">INTERCEPTOR</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--red); margin-bottom: 0.5rem; font-family: var(--font);">except:</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(255, 77, 77, 0.2); padding-bottom: 0.5rem;">MANEJO DE ERRORES</div>
+          <p style="font-size: 13px; margin-bottom: 0;"><strong style="color: var(--red);">Evita el colapso</strong> y el volcado de memoria (<span style="font-style:italic; color: var(--text-dim);">traceback</span>). Captura el objeto de error específico (ej. <code style="color:var(--magenta);">ValueError</code>) y <strong style="color: var(--red);">desvía el flujo hacia una solución segura</strong>.</p>
+        </div>
+
+        <div class="concept-card c-blue">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(0, 191, 255, 0.1); color: var(--blue); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">GARANTÍA</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--blue); margin-bottom: 0.5rem; font-family: var(--font);">finally:</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(0, 191, 255, 0.2); padding-bottom: 0.5rem;">LIMPIEZA DE MEMORIA</div>
+          <p style="font-size: 13px; margin-bottom: 0;">CPython <strong style="color: var(--blue);">fuerza su ejecución</strong> incluso tras un error fatal o un <code style="color:var(--magenta);">return</code> prematuro. Su rol es quitar candados a archivos y <strong style="color: var(--blue);">liberar recursos de la máquina</strong>.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1539,6 +1716,11 @@ a, button, .copy-btn, .nav-links a {
   <div class="compare-grid">
     <div class="compare-col bad">
       <div class="compare-header"><span class="compare-icon">✗</span> CÓDIGO INEFICIENTE</div>
+      <div class="compare-window">
+        <div class="terminal-bar">
+          <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="terminal-title" style="opacity: 0.5;">inseguro.py</div>
+        </div>
 <pre><span class="cmt"># Sin manejo de errores: el programa</span>
 <span class="cmt"># rompe con un traceback crudo y feo.</span>
 
@@ -1554,16 +1736,16 @@ a, button, .copy-btn, .nav-links a {
 <span class="var">result</span> <span class="op">=</span> <span class="var">numero</span> <span class="op">/</span> <span class="var">divisor</span>
 
 <span class="cmt"># El archivo NUNCA se cierra si hay error</span>
-<span class="var">f</span>.<span class="fn">close</span>()
-
-<span class="cmt">"""
-Traceback (most recent call last):
-  File "script.py", line 4
-ValueError: invalid literal for int()
-"""</span></pre>
+<span class="var">f</span>.<span class="fn">close</span>()</pre>
+      </div>
     </div>
     <div class="compare-col good">
       <div class="compare-header"><span class="compare-icon">✓</span> CÓDIGO OPTIMIZADO</div>
+      <div class="compare-window">
+        <div class="terminal-bar">
+          <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="terminal-title" style="opacity: 0.5;">robusto.py</div>
+        </div>
 <pre><span class="cmt"># try/except/finally: manejo elegante</span>
 <span class="cmt"># Mensajes claros, flujo controlado.</span>
 
@@ -1590,6 +1772,7 @@ ValueError: invalid literal for int()
     <span class="cmt"># ✅ Siempre se ejecuta: limpieza segura</span>
     <span class="kw">if</span> <span class="var">archivo</span>: <span class="var">archivo</span>.<span class="fn">close</span>()
     <span class="bi">print</span>(<span class="str">"[finally] Recursos liberados."</span>)</pre>
+      </div>
     </div>
   </div>
 
@@ -1746,10 +1929,31 @@ ValueError: invalid literal for int()
   <div class="module-header">
     <div class="module-num"><span class="t-prompt">&gt;</span> MÓDULO 03</div>
     <h2 class="module-title"><span class="accent">F-Strings</span> y Reportes Profesionales</h2>
-    <div class="module-def">
-      Los <strong>f-strings</strong> (<em>Formatted String Literals</em>, Python) revolucionaron la presentación de datos, dejando obsoletos tanto a la concatenación tradicional (<code>+</code>) como a los métodos antiguos como <code>.format()</code>.
-      <br><br>
-      <strong>¿Porqué?</strong> A diferencia de los métodos clásicos que obligan al intérprete a buscar marcadores temporales y mapear variables en un proceso lento de múltiples pasos, los f-strings son evaluados <em>en tiempo de ejecución</em>. Cuando Python lee un f-string, no lo ve como texto muerto, sino que compila las expresiones matemáticas o variables dentro de las llaves <code>{}</code> directamente en operaciones rápidas a nivel de lenguaje C. Además, resuelven el problema de la memoria: como los textos son inmutables, sumarlos con <code>+</code> genera copias basura constantes; el f-string calcula el tamaño final y pide la memoria de un solo golpe. Por último, su <em>Mini-Lenguaje de Formato</em> (ej. <code>:>9.2f</code>) traslada tareas pesadas como alinear, rellenar con ceros o redondear decimales al motor interno, ahorrándote el escribir código ineficiente a mano.
+    <div class="module-def" style="background: transparent; border: none; padding: 0;">
+      <div style="border-left: 3px solid var(--green); padding: 1rem 1.5rem; background: rgba(10, 20, 14, 0.85); border-radius: 0 var(--radius) var(--radius) 0; margin-bottom: 1.5rem;">
+        Los <strong style="color:var(--green); font-family: var(--font);">f-strings</strong> (<em>Formatted String Literals</em>) revolucionaron la presentación de datos en Python, dejando obsoletos tanto a la concatenación tradicional (<code>+</code>) como al clásico <code>.format()</code>.
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="concept-card c-blue">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(0, 191, 255, 0.1); color: var(--blue); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">VELOCIDAD</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--blue); margin-bottom: 0.5rem;">Evaluación Dinámica</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(0, 191, 255, 0.2); padding-bottom: 0.5rem;">COMPILACIÓN DIRECTA EN C</div>
+          <p style="font-size: 13px; margin-bottom: 0;">A diferencia de los métodos clásicos que buscan y reemplazan marcadores en múltiples pasos, los f-strings son evaluados <em style="color: var(--blue); font-weight: bold;">en tiempo de ejecución</em>. Python compila las variables de las llaves <code style="color:var(--magenta);">{}</code> directamente en <strong style="color: var(--blue);">operaciones súper rápidas a bajo nivel</strong>.</p>
+        </div>
+        
+        <div class="concept-card c-green">
+          <div style="position: absolute; top: 0; right: 0; background: rgba(0, 255, 102, 0.1); color: var(--green); font-size: 10px; font-weight: bold; padding: 4px 8px; border-bottom-left-radius: var(--radius);">EFICIENCIA</div>
+          <div style="font-size: 16px; font-weight: bold; color: var(--green); margin-bottom: 0.5rem;">Gestión de Memoria</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 0.05em; border-bottom: 1px dashed rgba(0, 255, 102, 0.2); padding-bottom: 0.5rem;">ASIGNACIÓN ÚNICA</div>
+          <p style="font-size: 13px; margin-bottom: 0;">En Python los textos son <strong style="color: var(--green);">inmutables</strong>. Sumarlos con <code>+</code> genera copias basura constantes. El f-string en cambio <strong style="color: var(--green);">precalcula el tamaño final exacto</strong> y pide la memoria a la RAM <strong style="color: var(--green);">de un solo golpe</strong>, evitando cuellos de botella.</p>
+        </div>
+      </div>
+      
+      <div style="background: rgba(255, 208, 0, 0.05); border-left: 3px solid var(--yellow); padding: 0.8rem 1.2rem; font-size: 12px; border-radius: 0 var(--radius) var(--radius) 0; display: flex; align-items: center; gap: 1rem;">
+        <span style="font-size: 20px;">⚡</span>
+        <div>Por último, su <strong style="color: var(--yellow);">Mini-Lenguaje de Formato</strong> (ej. <code style="color:var(--yellow);">:&gt;9.2f</code>) traslada tareas pesadas de procesamiento (como alinear, rellenar con ceros o redondear decimales) al motor interno.</div>
+      </div>
     </div>
   </div>
 
@@ -1758,6 +1962,11 @@ ValueError: invalid literal for int()
   <div class="compare-grid">
     <div class="compare-col bad">
       <div class="compare-header"><span class="compare-icon">✗</span> CÓDIGO INEFICIENTE</div>
+      <div class="compare-window">
+        <div class="terminal-bar">
+          <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="terminal-title" style="opacity: 0.5;">print_antiguo.py</div>
+        </div>
 <pre><span class="cmt"># Concatenación con + y % formatting</span>
 <span class="cmt"># Difícil de leer, sin control de formato.</span>
 
@@ -1774,14 +1983,16 @@ ValueError: invalid literal for int()
 <span class="cmt"># ❌ Sin control de alineación</span>
 <span class="kw">for</span> <span class="var">item</span> <span class="kw">in</span> [(<span class="str">"Pan"</span>,<span class="num">1.5</span>),(<span class="str">"Leche"</span>,<span class="num">200</span>)]:
   <span class="bi">print</span>(<span class="var">item</span>[<span class="num">0</span>] <span class="op">+</span> <span class="str">"   $"</span> <span class="op">+</span> <span class="bi">str</span>(<span class="var">item</span>[<span class="num">1</span>]))
-  <span class="cmt"># Columnas desalineadas, poco legible</span>
-
-<span class="cmt"># Salida:
-# Pan   $1.5
-# Leche   $200     ← desalineado</span></pre>
+  <span class="cmt"># Columnas desalineadas, poco legible</span></pre>
+      </div>
     </div>
     <div class="compare-col good">
       <div class="compare-header"><span class="compare-icon">✓</span> CÓDIGO OPTIMIZADO</div>
+      <div class="compare-window">
+        <div class="terminal-bar">
+          <div class="terminal-actions"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <div class="terminal-title" style="opacity: 0.5;">fstrings_pro.py</div>
+        </div>
 <pre><span class="cmt"># f-strings con especificadores de formato</span>
 <span class="cmt"># Legible, preciso y potente.</span>
 
@@ -1805,6 +2016,7 @@ ValueError: invalid literal for int()
 
 <span class="cmt"># ✅ Separador de miles</span>
 <span class="bi">print</span>(<span class="str">f"Stock: {1000000:,}"</span>)     <span class="cmt"># Stock: 1,000,000</span></pre>
+      </div>
     </div>
   </div>
 
@@ -2267,6 +2479,12 @@ function runSimulation(btn) {
   const container = btn.closest('.snippet-wrap');
   if (!container) return;
   
+  // Cambiar el estado del botón a "Procesando"
+  const originalText = btn.textContent;
+  btn.innerHTML = '<span class="term-loader" style="margin: 0 8px 0 0; color: inherit;"></span>PROCESANDO';
+  btn.classList.add('running');
+  btn.style.pointerEvents = 'none'; // Desactivar clics dobles
+
   // Forzar que el scroll se alinee perfectamente al centro de la pantalla
   container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -2309,6 +2527,11 @@ function runSimulation(btn) {
         line.style.animationName = ''; // Restaurar animación CSS normal
       }
     });
+
+    // Restaurar el botón original
+    btn.textContent = originalText;
+    btn.classList.remove('running');
+    btn.style.pointerEvents = 'auto';
   }, 1200);
 }
 
